@@ -1,5 +1,7 @@
+import { AppRouter } from "./routes/AppRoute"
+
 export function App() {
-  return <div className="flex min-h-svh p-6"></div>
+  return <AppRouter />
 }
 
 export default App
