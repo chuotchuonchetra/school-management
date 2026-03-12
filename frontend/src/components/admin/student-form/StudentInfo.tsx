@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { CreateStudentRequest } from "@/types/student.types"
+import type { StudentInfoData } from "@/types/student.types"
 import { ArrowRight } from "lucide-react"
 import { useState } from "react"
 
@@ -26,14 +26,12 @@ const classes = [
     id: 3,
   },
 ]
-const parantList = [
+const academicYear = [
   {
-    id: 1,
-    name: "Chan Sokpheak",
+    year: "2025-2026",
   },
   {
-    id: 2,
-    name: "Chan Sokha",
+    year: "2026-2027",
   },
 ]
 // const validate = (field: string) => {
@@ -43,22 +41,19 @@ interface StudentInfoProp {
   onNext: (isNext: boolean) => void
 }
 export const StudentInfo = ({ onNext }: StudentInfoProp) => {
-  const [form, setForm] = useState<CreateStudentRequest>({
+  const showForm = () => {
+    console.log(form)
+  }
+  const [form, setForm] = useState<StudentInfoData>({
     name: "",
     email: "",
     password: "",
     classId: 0,
-    parentId: undefined,
+    academicYear: "",
     studentNumber: "",
   })
-  const showForm = () => {
-    console.log(form)
-  }
   const selectedClass = classes.find((c) => c.id === form.classId)
-  const selectedParent = parantList.find((p) => p.id === form.parentId)
-  const handleInputForm = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleInputForm = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setForm({
       ...form,
@@ -70,7 +65,7 @@ export const StudentInfo = ({ onNext }: StudentInfoProp) => {
     if (form) return onNext(true)
   }
   return (
-    <div>
+    <div className="p-2">
       <form className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="">
@@ -89,6 +84,30 @@ export const StudentInfo = ({ onNext }: StudentInfoProp) => {
               placeholder="Student Number"
               name="studentNumber"
               value={form.studentNumber}
+              onChange={handleInputForm}
+              className="mt-2 py-4.5"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="">
+            <label htmlFor="name">Email*</label>
+            <Input
+              className="mt-2 py-4.5"
+              placeholder="Email"
+              name="email"
+              type="text"
+              value={form.email}
+              onChange={handleInputForm}
+            />
+          </div>
+          <div className="">
+            <label htmlFor="studentNumber">Password*</label>
+            <Input
+              type="password"
+              placeholder="Password"
+              name="password"
+              value={form.password}
               onChange={handleInputForm}
               className="mt-2 py-4.5"
             />
@@ -126,25 +145,23 @@ export const StudentInfo = ({ onNext }: StudentInfoProp) => {
           <div className="">
             <label htmlFor="">Select Parent</label>
             <Select
-              value={form.parentId ? String(form.parentId) : ""}
+              value={form.academicYear}
               onValueChange={(value) => {
                 setForm((pre) => ({
                   ...pre,
-                  parentId: Number(value),
+                  academicYear: String(value),
                 }))
               }}
             >
               <SelectTrigger className="mt-2 w-full py-4.5">
-                <SelectValue placeholder="Select parent">
-                  {selectedParent?.name}
-                </SelectValue>
+                <SelectValue placeholder="Select Academic Year" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {parantList.map((parent) => (
-                    <div key={parent.id}>
-                      <SelectItem value={String(parent.id)}>
-                        {parent.name}
+                  {academicYear.map((academicYear) => (
+                    <div key={academicYear.year}>
+                      <SelectItem value={String(academicYear.year)}>
+                        {academicYear.year}
                       </SelectItem>
                     </div>
                   ))}
@@ -153,13 +170,7 @@ export const StudentInfo = ({ onNext }: StudentInfoProp) => {
             </Select>
           </div>
         </div>
-        <Input
-          placeholder="Student Number"
-          name="studentNumber"
-          value={form.studentNumber}
-          onChange={handleInputForm}
-          className="py-4.5"
-        />
+
         <div className="flex justify-between border-t pt-4">
           <Button
             type="button"

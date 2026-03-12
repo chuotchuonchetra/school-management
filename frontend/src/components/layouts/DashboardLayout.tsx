@@ -15,31 +15,14 @@ const list: listI[] = [
   },
   { icon: <User size={14} />, listLebel: "Students", path: "/admin/students" },
 ]
-// export const DashboardLayout = () => {
-//   return (
-//     <div className="flex h-screen">
-//       <Navbar />
-//       <div className="flex flex-1 flex-col">
-//         <Sidebar list={list} role="admin" />
-//         <main className="mt-15 overflow-auto bg-gray-50 p-6">
-//           <Outlet />
-//         </main>
-//       </div>
-//     </div>
-//   )
-// }
+
 export const DashboardLayout = () => {
   return (
     <div className="flex h-screen flex-col">
-      {/* Navbar stays at the top */}
       <Navbar />
-
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar stays on the left */}
         <Sidebar list={list} role="admin" />
-
-        {/* Main/Outlet fills the remaining space */}
-        <main className="flex-1 overflow-auto bg-gray-50 p-6">
+        <main className="mt-16 flex-1 overflow-auto bg-gray-50 p-6">
           <Outlet />
         </main>
       </div>
