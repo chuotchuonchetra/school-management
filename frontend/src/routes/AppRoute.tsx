@@ -10,6 +10,10 @@ export const AppRouter = () => {
     <BrowserRouter>
       <Routes>
         <Route
+          path="/"
+          element={<LoginForm className="px-10 py-25 lg:p-25"></LoginForm>}
+        />
+        <Route
           path="/login"
           element={<LoginForm className="px-10 py-25 lg:p-25" />}
         />

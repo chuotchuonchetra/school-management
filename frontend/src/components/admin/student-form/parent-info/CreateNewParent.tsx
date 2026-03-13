@@ -17,9 +17,11 @@ const relationship = ["Father", "Mother", "Guardian"]
 
 interface CreateNewParentProps {
   sendDataToParentInfo: (data: ParentData) => void
+  onBack: () => void
 }
 
 export const CreateNewParent = ({
+  onBack,
   sendDataToParentInfo,
 }: CreateNewParentProps) => {
   const [form, setForm] = useState<ParentData>({
@@ -142,6 +144,7 @@ export const CreateNewParent = ({
         <div className="flex justify-between border-t pt-4">
           <Button
             type="button"
+            onClick={() => onBack()}
             className="cursor-pointer rounded-lg border px-4 py-4.5 text-end"
           >
             <ArrowLeft size={13} /> Back

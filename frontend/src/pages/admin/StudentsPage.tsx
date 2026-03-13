@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Plus } from "lucide-react"
+import { useState } from "react"
 
 interface StatCardType {
   title: string
@@ -54,9 +55,13 @@ const thead: string[] = [
   "action",
 ]
 export const StudentsPage = () => {
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const handleModal = () => {
+    setIsOpen(!isOpen)
+  }
   return (
     <div>
-      <div className="grid gap-6 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {studentStatCard.map((card) => (
           <div key={card.title}>
             <StatCard {...card} />
@@ -94,8 +99,9 @@ export const StudentsPage = () => {
               </SelectGroup>
             </SelectContent>
           </Select>
-          <Dialog>
+          <Dialog open={isOpen} onOpenChange={handleModal}>
             <DialogTrigger
+              onClick={() => handleModal()}
               className={
                 "text-md flex w-42 items-center justify-center rounded-md border bg-blue-500 p-1.5 text-white"
               }
@@ -107,7 +113,7 @@ export const StudentsPage = () => {
                 <DialogTitle></DialogTitle>
 
                 <div className="">
-                  <StudentForm />
+                  <StudentForm onClose={handleModal} />
                 </div>
               </DialogHeader>
             </DialogContent>

@@ -1,7 +1,32 @@
 import { Button } from "@/components/ui/button"
+import type { ParentData } from "@/types/student.types"
 import { ArrowLeft, ArrowRight } from "lucide-react"
-
-export const NoParent = () => {
+import { useState } from "react"
+interface Props {
+  sendDataToParentInfo: (data: ParentData) => void
+  onBack: () => void
+}
+const EMPTY_PARENT: ParentData = {
+  mode: "none",
+  newParent: {
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+    relationship: "Father",
+  },
+  existingParentId: undefined,
+  existingParent: undefined,
+}
+export const NoParent = ({ onBack, sendDataToParentInfo }: Props) => {
+  const [form, setForm] = useState<ParentData>(EMPTY_PARENT)
+  const handleNextComfirm = () => {
+    setForm((prev) => ({
+      ...prev,
+      mode: "none",
+    }))
+    sendDataToParentInfo(form)
+  }
   return (
     <div className="">
       <div className="my-2 flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 py-10">
@@ -35,13 +60,14 @@ export const NoParent = () => {
         <Button
           type="button"
           className="cursor-pointer rounded-lg border px-4 py-4.5 text-end"
+          onClick={() => onBack()}
         >
           <ArrowLeft size={13} /> Back
         </Button>
         <Button
           type="button"
           className="cursor-pointer rounded-lg border py-4.5 text-end"
-          // onClick={() => handleNextStep}
+          onClick={() => handleNextComfirm}
         >
           Next Comfirm
           <ArrowRight size={14} />

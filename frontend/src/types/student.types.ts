@@ -6,14 +6,18 @@ export interface StudentListItem {
   className: string // from class.name
   parentName?: string // from parent.name
   attendanceRate: number // calculated %
+  profileImage?: string | null
 }
 export interface CreateStudentRequest {
   name: string
   email: string
   password: string
-  classId: number
-  parentId?: number
   studentNumber: string
+  classId: number
+  academicYear: string
+  profileImage?: string | null
+  parentId?: number
+  newParent?: NewParentData
 }
 export interface StudentInfoData {
   name: string
@@ -38,6 +42,7 @@ export interface ExistingParent {
   email: string
   phone: string
   linkedChildren: string[] // student names already linked
+  profileImage: string | null
 }
 
 export type ParentMode = "new" | "existing" | "none"

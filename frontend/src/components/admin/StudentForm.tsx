@@ -2,8 +2,13 @@ import { useState } from "react"
 import { StudentInfo } from "./student-form/StudentInfo"
 import { ParentInfo } from "./student-form/ParentInfo"
 
-import type { ParentData, StudentInfoData } from "@/types/student.types"
+import type {
+  CreateStudentRequest,
+  ParentData,
+  StudentInfoData,
+} from "@/types/student.types"
 import ConfirmStep from "./student-form/ComfirmCreate"
+
 export interface StudentFormData {
   studentInfo: StudentInfoData
   parentData: ParentData
@@ -30,28 +35,65 @@ const EMPTY_PARENT: ParentData = {
   existingParentId: undefined,
   existingParent: undefined,
 }
-export const StudentForm = () => {
+interface Props {
+  onClose: (data: boolean) => void
+}
+export const StudentForm = ({ onClose }: Props) => {
   const [step, setStep] = useState<number>(1)
-  const [parentData, setParentData] = useState<ParentData>()
-  const [studentData, setStudentData] = useState<StudentInfoData>()
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [formData, setFormData] = useState<StudentFormData>({
     studentInfo: EMPTY_STUDENT,
     parentData: EMPTY_PARENT,
   })
-  const handleStudentStepDone = (done: boolean) => {
-    if (done) setStep(2)
+  const handleStudentInfoNext = (data: StudentInfoData) => {
+    if (data) {
+      setFormData((prev) => ({
+        ...prev,
+        studentInfo: data,
+      }))
+      setStep(2)
+    }
   }
   const handleParentData = (data: ParentData) => {
     if (data) {
-      setParentData(data)
+      setFormData((prev) => ({
+        ...prev,
+        parentData: data,
+      }))
       setStep(3)
     }
   }
-  console.log(parentData)
-
+  const handleModalForm = (data: boolean) => {
+    onClose(data)
+  }
   // const nextStep = () => setStep((s) => s + 1)
-  // const prevStep = () => setStep((s) => s - 1)
+  const prevStep = () => setStep((s) => s - 1)
+  const onSubmit = () => {
+    try {
+      setIsLoading(true)
+      const { studentInfo, parentData } = formData
+      const body: CreateStudentRequest = {
+        name: studentInfo.name,
+        email: studentInfo.email,
+        password: studentInfo.password,
+        studentNumber: studentInfo.studentNumber,
+        classId: studentInfo.classId as number,
+        academicYear: studentInfo.academicYear,
+      }
 
+      if (formData.parentData.mode == "new") {
+        body.newParent = parentData.newParent
+      }
+      if (formData.parentData.mode == "existing") {
+        body.parentId = parentData.existingParentId
+      }
+      console.log("body", body)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
   return (
     <div className="xl:p-6">
       {/* header */}
@@ -120,7 +162,10 @@ export const StudentForm = () => {
               : "pointer-events-none absolute inset-0 -translate-x-5 opacity-0"
           }`}
         >
-          <StudentInfo onNext={handleStudentStepDone} />
+          <StudentInfo
+            onClose={handleModalForm}
+            studentInfoData={handleStudentInfoNext}
+          />
         </div>
 
         <div
@@ -130,7 +175,10 @@ export const StudentForm = () => {
               : "pointer-events-none absolute inset-0 translate-x-5 opacity-0"
           }`}
         >
-          <ParentInfo sendDataToStudentForm={handleParentData} />
+          <ParentInfo
+            sendDataToStudentForm={handleParentData}
+            onBack={prevStep}
+          />
         </div>
 
         <div
@@ -140,7 +188,12 @@ export const StudentForm = () => {
               : "pointer-events-none absolute inset-0 translate-x-5 opacity-0"
           }`}
         >
-          <ConfirmStep formData={formData} />
+          <ConfirmStep
+            formData={formData}
+            onBack={prevStep}
+            onSubmit={onSubmit}
+            isLoading={isLoading}
+          />
         </div>
       </div>
     </div>

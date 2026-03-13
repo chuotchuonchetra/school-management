@@ -26,7 +26,7 @@ const Row = ({
   <div className="flex items-center justify-between border-b border-gray-100 py-1.5 text-xs last:border-none">
     <span className="font-medium text-gray-400">{label}</span>
     <span
-      className={`font-bold ${highlight ? "text-blue-600" : "text-gray-800"}`}
+      className={`font-bold ${highlight ? "text-blue-600" : "text-gray-800"} `}
     >
       {value}
     </span>
@@ -147,7 +147,7 @@ const ConfirmStep = ({ formData, isLoading, onSubmit, onBack }: Props) => {
           <Row label="Email" value={parentData.existingParent.email} />
           <Row
             label="Already Parent Of"
-            value={parentData.existingParent.linkedChildren.join(", ") || "—"}
+            value={parentData.existingParent.linkedChildren}
           />
           <Row label="Will Also Parent" value={studentInfo.name} highlight />
         </div>

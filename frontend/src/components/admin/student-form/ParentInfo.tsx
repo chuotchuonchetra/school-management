@@ -6,8 +6,12 @@ import type { ParentData } from "@/types/student.types"
 
 interface ParentInfoProps {
   sendDataToStudentForm: (data: ParentData) => void
+  onBack: () => void
 }
-export const ParentInfo = ({ sendDataToStudentForm }: ParentInfoProps) => {
+export const ParentInfo = ({
+  sendDataToStudentForm,
+  onBack,
+}: ParentInfoProps) => {
   return (
     <div>
       ParentInfo
@@ -27,13 +31,22 @@ export const ParentInfo = ({ sendDataToStudentForm }: ParentInfoProps) => {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="newparent">
-                <CreateNewParent sendDataToParentInfo={sendDataToStudentForm} />
+                <CreateNewParent
+                  sendDataToParentInfo={sendDataToStudentForm}
+                  onBack={onBack}
+                />
               </TabsContent>
               <TabsContent value="linkparent">
-                <LinkExistingParent />
+                <LinkExistingParent
+                  sendExistingParent={sendDataToStudentForm}
+                  onBack={onBack}
+                />
               </TabsContent>
               <TabsContent value="noparent">
-                <NoParent />
+                <NoParent
+                  sendDataToParentInfo={sendDataToStudentForm}
+                  onBack={onBack}
+                />
               </TabsContent>
             </Tabs>
           </div>

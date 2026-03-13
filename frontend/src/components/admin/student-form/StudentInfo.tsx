@@ -38,12 +38,12 @@ const academicYear = [
 //   if (field == "name") return "error"
 // }
 interface StudentInfoProp {
-  onNext: (isNext: boolean) => void
+  studentInfoData: (data: StudentInfoData) => void
+  onClose: (data: boolean) => void
 }
-export const StudentInfo = ({ onNext }: StudentInfoProp) => {
-  const showForm = () => {
-    console.log(form)
-  }
+export const StudentInfo = ({ onClose, studentInfoData }: StudentInfoProp) => {
+ 
+
   const [form, setForm] = useState<StudentInfoData>({
     name: "",
     email: "",
@@ -62,7 +62,11 @@ export const StudentInfo = ({ onNext }: StudentInfoProp) => {
     console.log(value)
   }
   const handleNextStep = () => {
-    if (form) return onNext(true)
+    console.log(form)
+    studentInfoData(form)
+  }
+  const handleModal = (data: boolean) => {
+    onClose(data)
   }
   return (
     <div className="p-2">
@@ -175,15 +179,14 @@ export const StudentInfo = ({ onNext }: StudentInfoProp) => {
           <Button
             type="button"
             className="cursor-pointer rounded-lg border px-4 py-4.5 text-end"
-            onClick={showForm}
+            onClick={() => handleModal(false)}
           >
             Cancel
           </Button>
           <Button
             type="button"
             className="cursor-pointer rounded-lg border py-4.5 text-end"
-            // onClick={() => handleNextStep}
-            onClick={handleNextStep}
+            onClick={() => handleNextStep()}
           >
             Next Parent / Guardian <ArrowRight size={14} />
           </Button>
