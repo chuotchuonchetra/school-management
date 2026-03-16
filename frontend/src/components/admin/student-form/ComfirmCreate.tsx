@@ -1,9 +1,7 @@
-// ─────────────────────────────────────────────────────────────
-//  components/ConfirmStep.tsx
-//  Step 3 — review everything before final submit
-//  Shows different parent block depending on parent mode
-// ─────────────────────────────────────────────────────────────
+// components/ConfirmStep.tsx
+// Step 3 — show a summary of everything before submitting
 
+import Avatar from "@/components/shared/Avatar"
 import type { StudentFormData } from "../StudentForm"
 
 interface Props {
@@ -13,37 +11,67 @@ interface Props {
   onBack: () => void
 }
 
-// ── Reusable confirm row ──────────────────────────────────────
-const Row = ({
+// ─────────────────────────────────────────────────────────────
+//  Small reusable row: "Label .............. Value"
+// ─────────────────────────────────────────────────────────────
+const InfoRow = ({
   label,
   value,
-  highlight,
+  accent = false,
 }: {
   label: string
   value: React.ReactNode
-  highlight?: boolean
+  accent?: boolean
 }) => (
   <div className="flex items-center justify-between border-b border-gray-100 py-1.5 text-xs last:border-none">
-    <span className="font-medium text-gray-400">{label}</span>
+    <span className="text-gray-400">{label}</span>
     <span
-      className={`font-bold ${highlight ? "text-blue-600" : "text-gray-800"} `}
+      className={accent ? "font-bold text-blue-600" : "font-bold text-gray-800"}
     >
       {value}
     </span>
   </div>
 )
 
+// ─────────────────────────────────────────────────────────────
+//  Small badge: NEW / EXISTING / SKIPPED
+// ─────────────────────────────────────────────────────────────
+const Badge = ({ type }: { type: "new" | "existing" | "skipped" }) => {
+  const styles = {
+    new: "bg-blue-50  border-blue-200  text-blue-600",
+    existing: "bg-green-50 border-green-200 text-green-600",
+    skipped: "bg-gray-100 border-gray-200  text-gray-400",
+  }
+  const labels = { new: "NEW", existing: "EXISTING", skipped: "SKIPPED" }
+
+  return (
+    <span
+      className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${styles[type]}`}
+    >
+      {labels[type]}
+    </span>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Card wrapper used for both Student and Parent blocks
+// ─────────────────────────────────────────────────────────────
+const SummaryCard = ({ children }: { children: React.ReactNode }) => (
+  <div className="mb-3 rounded-xl border border-gray-200 bg-gray-50 p-4">
+    {children}
+  </div>
+)
+
+// ─────────────────────────────────────────────────────────────
+//  MAIN COMPONENT
+// ─────────────────────────────────────────────────────────────
 const ConfirmStep = ({ formData, isLoading, onSubmit, onBack }: Props) => {
   const { studentInfo, parentData } = formData
 
-  // ── What gets created ─────────────────────
-  const accountsCreated = parentData.mode === "new" ? 2 : 1
-  const parentLabel =
-    parentData.mode === "new"
-      ? "New parent account will be created"
-      : parentData.mode === "existing"
-        ? "Existing parent will be linked"
-        : "No parent linked"
+  const willCreateParent = parentData.mode === "new"
+  const willLinkParent = parentData.mode === "existing"
+  const noParent = parentData.mode === "none"
+  const totalAccounts = willCreateParent ? 2 : 1
 
   return (
     <div>
@@ -51,144 +79,166 @@ const ConfirmStep = ({ formData, isLoading, onSubmit, onBack }: Props) => {
         Review everything below before creating the account(s).
       </p>
 
-      {/* ── Student block ── */}
-      <div className="mb-3 rounded-xl border border-gray-200 bg-gray-50 p-4">
-        {/* Block header */}
+      {/* ── STUDENT BLOCK ─────────────────────────────────── */}
+      <SummaryCard>
+        {/* Header row: avatar + name + badge */}
         <div className="mb-3 flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
-            {studentInfo.name.charAt(0) || "S"}
-          </div>
+          {parentData.newParent?.profileImage !== null ? (
+            <Avatar
+              profileImage={studentInfo.profileImage}
+              name={studentInfo.name}
+            />
+          ) : (
+            <div className="my-auto flex h-10 w-10 items-center justify-center rounded-full border bg-amber-200 font-bold">
+              {parentData.newParent.name.charAt(0).toUpperCase()}
+            </div>
+          )}
           <div className="flex-1">
-            <div className="text-sm font-extrabold text-gray-800">
+            <p className="text-sm font-extrabold text-gray-800">
               {studentInfo.name || "—"}
-            </div>
-            <div className="text-[10px] text-gray-400">
+            </p>
+            <p className="text-[10px] text-gray-400">
               Student Account · Will be created
-            </div>
+            </p>
           </div>
-          <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">
-            NEW
-          </span>
+          <Badge type="new" />
         </div>
 
-        <div className="mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+        {/* Detail rows */}
+        <p className="mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
           Student Details
-        </div>
-        <Row label="Full Name" value={studentInfo.name} />
-        <Row label="Student Number" value={studentInfo.studentNumber} />
-        <Row label="Email" value={studentInfo.email} />
-        <Row label="Class" value={`Class ID ${studentInfo.classId}`} />
-        <Row label="Academic Year" value={studentInfo.academicYear} />
-        <Row
+        </p>
+        <InfoRow label="Full Name" value={studentInfo.name} />
+        <InfoRow label="Student Number" value={studentInfo.studentNumber} />
+        <InfoRow label="Email" value={studentInfo.email} />
+        <InfoRow label="Class ID" value={studentInfo.classId} />
+        <InfoRow label="Academic Year" value={studentInfo.academicYear} />
+        <InfoRow
           label="Role"
           value={<span className="text-green-600">student</span>}
         />
-      </div>
+      </SummaryCard>
 
-      {/* ── Parent block — NEW ── */}
-      {parentData.mode === "new" && parentData.newParent && (
-        <div className="mb-3 rounded-xl border border-gray-200 bg-gray-50 p-4">
+      {/* ── PARENT BLOCK: NEW ─────────────────────────────── */}
+      {willCreateParent && parentData.newParent && (
+        <SummaryCard>
           <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-500 text-sm font-bold text-white">
-              {parentData.newParent.name.charAt(0) || "P"}
-            </div>
+            {parentData.newParent?.profileImage !== null ? (
+              <Avatar
+                name={parentData.newParent.name}
+                profileImage={parentData.newParent.profileImage}
+              />
+            ) : (
+              <div className="my-auto flex h-10 w-10 items-center justify-center rounded-full border bg-amber-200 font-bold">
+                {parentData.newParent.name.charAt(0).toUpperCase()}
+              </div>
+            )}
             <div className="flex-1">
-              <div className="text-sm font-extrabold text-gray-800">
+              <p className="text-sm font-extrabold text-gray-800">
                 {parentData.newParent.name}
-              </div>
-              <div className="text-[10px] text-gray-400">
+              </p>
+              <p className="text-[10px] text-gray-400">
                 Parent Account · Will be created
-              </div>
+              </p>
             </div>
-            <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">
-              NEW
-            </span>
+            <Badge type="new" />
           </div>
 
-          <div className="mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+          <p className="mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
             Parent Details
-          </div>
-          <Row label="Full Name" value={parentData.newParent.name} />
-          <Row label="Email" value={parentData.newParent.email} />
-          <Row label="Phone" value={parentData.newParent.phone || "—"} />
-          <Row label="Relationship" value={parentData.newParent.relationship} />
-          <Row
+          </p>
+          <InfoRow label="Full Name" value={parentData.newParent.name} />
+          <InfoRow label="Email" value={parentData.newParent.email} />
+          <InfoRow label="Phone" value={parentData.newParent.phone || "—"} />
+          <InfoRow
+            label="Relationship"
+            value={parentData.newParent.relationship}
+          />
+          <InfoRow
             label="Role"
             value={<span className="text-indigo-600">parent</span>}
           />
-          <Row label="Linked To" value={studentInfo.name} highlight />
-        </div>
+          <InfoRow label="Linked To" value={studentInfo.name} accent />
+        </SummaryCard>
       )}
 
-      {/* ── Parent block — EXISTING ── */}
-      {parentData.mode === "existing" && parentData.existingParent && (
-        <div className="mb-3 rounded-xl border border-gray-200 bg-gray-50 p-4">
+      {/* ── PARENT BLOCK: EXISTING ────────────────────────── */}
+      {willLinkParent && parentData.existingParent && (
+        <SummaryCard>
           <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-500 text-sm font-bold text-white">
-              {parentData.existingParent.name.charAt(0)}
-            </div>
+            {parentData.newParent?.profileImage !== undefined ? (
+              <Avatar
+                name={parentData.existingParent.name}
+                profileImage={parentData.existingParent.profileImage}
+              />
+            ) : (
+              <div className="h-6 w-6 rounded-full border bg-amber-200"></div>
+            )}
             <div className="flex-1">
-              <div className="text-sm font-extrabold text-gray-800">
+              <p className="text-sm font-extrabold text-gray-800">
                 {parentData.existingParent.name}
-              </div>
-              <div className="text-[10px] text-gray-400">
+              </p>
+              <p className="text-[10px] text-gray-400">
                 Existing parent · Will be linked
-              </div>
+              </p>
             </div>
-            <span className="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[10px] font-bold text-green-600">
-              EXISTING
-            </span>
+            <Badge type="existing" />
           </div>
 
-          <div className="mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+          <p className="mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
             Parent Details
-          </div>
-          <Row label="Full Name" value={parentData.existingParent.name} />
-          <Row label="Email" value={parentData.existingParent.email} />
-          <Row
+          </p>
+          <InfoRow label="Full Name" value={parentData.existingParent.name} />
+          <InfoRow label="Email" value={parentData.existingParent.email} />
+          <InfoRow
             label="Already Parent Of"
-            value={parentData.existingParent.linkedChildren}
+            value={parentData.existingParent.linkedChildren || "—"}
           />
-          <Row label="Will Also Parent" value={studentInfo.name} highlight />
-        </div>
+          <InfoRow label="Will Also Parent" value={studentInfo.name} accent />
+        </SummaryCard>
       )}
 
-      {/* ── Parent block — NONE ── */}
-      {parentData.mode === "none" && (
-        <div className="mb-3 rounded-xl border border-gray-200 bg-gray-50 p-4">
+      {/* ── PARENT BLOCK: NONE ───────────────────────────── */}
+      {noParent && (
+        <SummaryCard>
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-300 text-sm font-bold text-gray-500">
               ?
             </div>
             <div className="flex-1">
-              <div className="text-sm font-bold text-gray-400">
+              <p className="text-sm font-bold text-gray-400">
                 No Parent / Guardian
-              </div>
-              <div className="text-[10px] text-gray-400">
+              </p>
+              <p className="text-[10px] text-gray-400">
                 No parent account will be created or linked
-              </div>
+              </p>
             </div>
-            <span className="rounded-full border border-gray-200 bg-gray-100 px-2 py-0.5 text-[10px] font-bold text-gray-400">
-              SKIPPED
-            </span>
+            <Badge type="skipped" />
           </div>
           <p className="mt-3 border-t border-gray-200 pt-3 text-[10px] text-gray-400">
             ℹ️ You can add a parent later from{" "}
             <strong className="text-gray-600">Students → Edit Student</strong>
           </p>
-        </div>
+        </SummaryCard>
       )}
 
-      {/* ── Summary banner ── */}
-      <div className="mb-4 flex flex-wrap gap-x-4 gap-y-1 rounded-xl border border-green-200 bg-green-50 p-3 text-[11px] text-green-700">
+      {/* ── SUMMARY BANNER ───────────────────────────────── */}
+      <div className="mb-4 flex flex-wrap gap-4 rounded-xl border border-green-200 bg-green-50 p-3 text-[11px] text-green-700">
         <span>
-          ✅ {accountsCreated} account{accountsCreated > 1 ? "s" : ""} will be
+          ✅ {totalAccounts} account{totalAccounts > 1 ? "s" : ""} will be
           created
         </span>
-        <span>✅ {parentLabel}</span>
+        <span>
+          ✅{" "}
+          {willCreateParent
+            ? "New parent will be created"
+            : willLinkParent
+              ? "Existing parent will be linked"
+              : "No parent linked"}
+        </span>
       </div>
 
-      {/* Footer */}
+      {/* ── FOOTER BUTTONS ───────────────────────────────── */}
       <div className="flex items-center justify-between border-t border-gray-100 pt-4">
         <button
           onClick={onBack}
@@ -208,7 +258,7 @@ const ConfirmStep = ({ formData, isLoading, onSubmit, onBack }: Props) => {
               Creating...
             </>
           ) : (
-            `✓ Create ${accountsCreated > 1 ? "Student & Parent" : "Student"}`
+            `✓ Create ${totalAccounts > 1 ? "Student & Parent" : "Student"}`
           )}
         </button>
       </div>

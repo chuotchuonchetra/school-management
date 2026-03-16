@@ -1,12 +1,17 @@
+// ── Lightweight row used in the students list table ───────────
 export interface StudentListItem {
   id: number
   studentNumber: string
   name: string // from user.name
   email: string // from user.email
+  profileImage: string | null // from user.profileImage
   className: string // from class.name
-  parentName?: string // from parent.name
-  attendanceRate: number // calculated %
-  profileImage?: string | null
+  parentName: string | null // from parent user.name
+
+  // Attendance — computed by backend before returning the list
+  // overall percentage across all subjects e.g. 87.5
+  attendanceRate: number | null // null = no attendance recorded yet
+  isAtRisk: boolean // true if attendanceRate < 75
 }
 export interface CreateStudentRequest {
   name: string
@@ -15,7 +20,7 @@ export interface CreateStudentRequest {
   studentNumber: string
   classId: number
   academicYear: string
-  profileImage?: string | null
+  profileImage?: string | File | null
   parentId?: number
   newParent?: NewParentData
 }
@@ -26,6 +31,7 @@ export interface StudentInfoData {
   password: string
   classId: number | ""
   academicYear: string
+  profileImage: string | File | null
 }
 // ── Step 2: Parent data ───────────────────────────────────────
 export interface NewParentData {
@@ -34,6 +40,7 @@ export interface NewParentData {
   password: string
   phone: string
   relationship: "Father" | "Mother" | "Guardian"
+  profileImage: string | File | null
 }
 
 export interface ExistingParent {
@@ -42,7 +49,7 @@ export interface ExistingParent {
   email: string
   phone: string
   linkedChildren: string[] // student names already linked
-  profileImage: string | null
+  profileImage: string | File | null
 }
 
 export type ParentMode = "new" | "existing" | "none"

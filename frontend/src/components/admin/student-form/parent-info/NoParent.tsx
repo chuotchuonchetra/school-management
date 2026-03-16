@@ -14,6 +14,7 @@ const EMPTY_PARENT: ParentData = {
     password: "",
     phone: "",
     relationship: "Father",
+    profileImage: null,
   },
   existingParentId: undefined,
   existingParent: undefined,
@@ -25,6 +26,7 @@ export const NoParent = ({ onBack, sendDataToParentInfo }: Props) => {
       ...prev,
       mode: "none",
     }))
+
     sendDataToParentInfo(form)
   }
   return (
@@ -67,7 +69,7 @@ export const NoParent = ({ onBack, sendDataToParentInfo }: Props) => {
         <Button
           type="button"
           className="cursor-pointer rounded-lg border py-4.5 text-end"
-          onClick={() => handleNextComfirm}
+          onClick={() => handleNextComfirm()}
         >
           Next Comfirm
           <ArrowRight size={14} />

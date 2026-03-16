@@ -1,3 +1,4 @@
+import { ImageUpload } from "@/components/shared/ImageUpload"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -32,6 +33,7 @@ export const CreateNewParent = ({
       password: "",
       phone: "",
       relationship: "Guardian",
+      profileImage: null,
     },
   })
 
@@ -46,6 +48,7 @@ export const CreateNewParent = ({
           password: "",
           phone: "",
           relationship: "Guardian",
+          profileImage: null,
         }),
         [name]: value,
       },
@@ -56,12 +59,7 @@ export const CreateNewParent = ({
     setForm((prev) => ({
       ...prev,
       newParent: {
-        ...(prev.newParent || {
-          email: "",
-          name: "",
-          password: "",
-          phone: "",
-        }),
+        ...prev.newParent!,
         relationship: value as "Father" | "Mother" | "Guardian",
       },
       relationship: value,
@@ -71,6 +69,16 @@ export const CreateNewParent = ({
   return (
     <div>
       <form className="flex flex-col gap-4 p-2">
+        <ImageUpload
+          label="Parent Photo"
+          name={form.newParent?.name}
+          onChange={(file) => {
+            setForm((prev) => ({
+              ...prev,
+              profileImage: file,
+            }))
+          }}
+        />
         <div className="grid grid-cols-2 gap-4">
           <div className="">
             <label htmlFor="name">Full Name*</label>
@@ -83,7 +91,7 @@ export const CreateNewParent = ({
             />
           </div>
           <div className="">
-            <label htmlFor="">Relationship </label>
+            <label htmlFor="">Relationship</label>
             <Select
               value={form.newParent?.relationship || ""}
               onValueChange={() => handleSelectChange}

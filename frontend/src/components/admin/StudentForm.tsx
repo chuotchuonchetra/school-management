@@ -21,6 +21,7 @@ const EMPTY_STUDENT: StudentInfoData = {
   password: "",
   classId: "",
   academicYear: "2025-2026",
+  profileImage: null,
 }
 
 const EMPTY_PARENT: ParentData = {
@@ -31,6 +32,7 @@ const EMPTY_PARENT: ParentData = {
     password: "",
     phone: "",
     relationship: "Father",
+    profileImage: "",
   },
   existingParentId: undefined,
   existingParent: undefined,
@@ -79,6 +81,7 @@ export const StudentForm = ({ onClose }: Props) => {
         studentNumber: studentInfo.studentNumber,
         classId: studentInfo.classId as number,
         academicYear: studentInfo.academicYear,
+        profileImage: studentInfo.profileImage,
       }
 
       if (formData.parentData.mode == "new") {

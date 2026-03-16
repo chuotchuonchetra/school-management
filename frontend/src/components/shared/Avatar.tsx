@@ -8,7 +8,7 @@
 
 interface Props {
   name: string
-  profileImage: string | null
+  profileImage: string | File | null
   size?: "sm" | "md" | "lg" | "xl"
   className?: string
 }
@@ -43,25 +43,46 @@ const SIZE_CLASSES = {
   xl: "w-16 h-16 text-base",
 }
 
+import { useMemo } from "react"
+
+interface Props {
+  name: string
+  profileImage: string | File | null
+  size?: "sm" | "md" | "lg" | "xl"
+  className?: string
+}
+
+// ... (getAvatarColor, getInitials, and SIZE_CLASSES remain the same)
+
 const Avatar = ({ name, profileImage, size = "md", className = "" }: Props) => {
   const sizeClass = SIZE_CLASSES[size]
   const colorClass = getAvatarColor(name)
   const initials = getInitials(name)
 
-  if (profileImage) {
+  // Convert File to a temporary URL string if necessary
+  const imgSrc = useMemo(() => {
+    if (!profileImage) return null
+
+    if (profileImage instanceof File) {
+      return URL.createObjectURL(profileImage)
+    }
+
+    return profileImage
+  }, [profileImage])
+
+  if (imgSrc) {
     return (
       <img
-        src={profileImage}
+        src={imgSrc}
         alt={name}
         className={`${sizeClass} shrink-0 rounded-full object-cover ${className}`}
       />
     )
   }
 
-  // Fallback — colored circle with initials
   return (
     <div
-      className={` ${sizeClass} ${colorClass} ${className} flex shrink-0 items-center justify-center rounded-full font-bold text-white select-none`}
+      className={`${sizeClass} ${colorClass} ${className} flex shrink-0 items-center justify-center rounded-full font-bold text-white select-none`}
     >
       {initials}
     </div>

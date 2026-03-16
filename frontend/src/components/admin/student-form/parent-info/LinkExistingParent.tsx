@@ -48,6 +48,7 @@ const EMPTY_PARENT: ParentData = {
     password: "",
     phone: "",
     relationship: "Father",
+    profileImage: null,
   },
   existingParentId: undefined,
   existingParent: undefined,
