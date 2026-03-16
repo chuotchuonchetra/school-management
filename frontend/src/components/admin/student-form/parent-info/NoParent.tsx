@@ -9,7 +9,8 @@ interface Props {
 const EMPTY_PARENT: ParentData = {
   mode: "none",
   newParent: {
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     phone: "",

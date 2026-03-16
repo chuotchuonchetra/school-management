@@ -27,7 +27,8 @@ interface StudentInfoProp {
 
 export const StudentInfo = ({ onClose, studentInfoData }: StudentInfoProp) => {
   const [form, setForm] = useState<StudentInfoData>({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     classId: 0,
@@ -53,7 +54,7 @@ export const StudentInfo = ({ onClose, studentInfoData }: StudentInfoProp) => {
         {/* ── Profile Image Upload ── */}
 
         <ImageUpload
-          name={form.name}
+          name={form.firstName}
           onChange={(file) => {
             setForm((prev) => ({
               ...prev,
@@ -64,12 +65,22 @@ export const StudentInfo = ({ onClose, studentInfoData }: StudentInfoProp) => {
         {/* ── Existing fields (unchanged) ── */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="name">Full Name*</label>
+            <label htmlFor="name">First Name*</label>
             <Input
               className="mt-2 py-4.5"
               placeholder="Name"
-              name="name"
-              value={form.name}
+              name="fristName"
+              value={form.firstName}
+              onChange={handleInputForm}
+            />
+          </div>
+          <div>
+            <label htmlFor="name">Last Name*</label>
+            <Input
+              className="mt-2 py-4.5"
+              placeholder="Name"
+              name="lastName"
+              value={form.lastName}
               onChange={handleInputForm}
             />
           </div>

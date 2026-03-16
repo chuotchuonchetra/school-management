@@ -43,7 +43,8 @@ const MOCK_PARENTS: ExistingParent[] = [
 const EMPTY_PARENT: ParentData = {
   mode: "existing",
   newParent: {
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     phone: "",

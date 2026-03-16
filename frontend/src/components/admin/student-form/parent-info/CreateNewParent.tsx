@@ -28,7 +28,9 @@ export const CreateNewParent = ({
   const [form, setForm] = useState<ParentData>({
     mode: "new",
     newParent: {
-      name: "",
+      firstName: "",
+      lastName: "",
+
       email: "",
       password: "",
       phone: "",
@@ -43,7 +45,8 @@ export const CreateNewParent = ({
       ...prev,
       newParent: {
         ...(prev.newParent || {
-          name: "",
+          firstName: "",
+          lastName: "",
           email: "",
           password: "",
           phone: "",
@@ -71,7 +74,7 @@ export const CreateNewParent = ({
       <form className="flex flex-col gap-4 p-2">
         <ImageUpload
           label="Parent Photo"
-          name={form.newParent?.name}
+          name={form.newParent?.firstName}
           onChange={(file) => {
             setForm((prev) => ({
               ...prev,
@@ -81,12 +84,22 @@ export const CreateNewParent = ({
         />
         <div className="grid grid-cols-2 gap-4">
           <div className="">
-            <label htmlFor="name">Full Name*</label>
+            <label htmlFor="name">First Name*</label>
             <Input
               className="mt-2 py-4.5"
               placeholder="Name"
               name="name"
-              value={form.newParent?.name}
+              value={form.newParent?.firstName}
+              onChange={handleInputForm}
+            />
+          </div>
+          <div className="">
+            <label htmlFor="name">Last Name*</label>
+            <Input
+              className="mt-2 py-4.5"
+              placeholder="Name"
+              name="name"
+              value={form.newParent?.lastName}
               onChange={handleInputForm}
             />
           </div>

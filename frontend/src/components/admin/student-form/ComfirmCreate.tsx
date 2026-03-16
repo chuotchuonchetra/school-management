@@ -86,16 +86,17 @@ const ConfirmStep = ({ formData, isLoading, onSubmit, onBack }: Props) => {
           {parentData.newParent?.profileImage !== null ? (
             <Avatar
               profileImage={studentInfo.profileImage}
-              name={studentInfo.name}
+              name={studentInfo.firstName}
             />
           ) : (
             <div className="my-auto flex h-10 w-10 items-center justify-center rounded-full border bg-amber-200 font-bold">
-              {parentData.newParent.name.charAt(0).toUpperCase()}
+              {(parentData.newParent?.firstName ?? "").charAt(0).toUpperCase()}
             </div>
           )}
           <div className="flex-1">
             <p className="text-sm font-extrabold text-gray-800">
-              {studentInfo.name || "—"}
+              {studentInfo.lastName}
+              {studentInfo.firstName || "—"}
             </p>
             <p className="text-[10px] text-gray-400">
               Student Account · Will be created
@@ -108,7 +109,10 @@ const ConfirmStep = ({ formData, isLoading, onSubmit, onBack }: Props) => {
         <p className="mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
           Student Details
         </p>
-        <InfoRow label="Full Name" value={studentInfo.name} />
+        <InfoRow
+          label="Full Name"
+          value={`${studentInfo.firstName} ${studentInfo.lastName}`}
+        />
         <InfoRow label="Student Number" value={studentInfo.studentNumber} />
         <InfoRow label="Email" value={studentInfo.email} />
         <InfoRow label="Class ID" value={studentInfo.classId} />
@@ -125,17 +129,20 @@ const ConfirmStep = ({ formData, isLoading, onSubmit, onBack }: Props) => {
           <div className="mb-3 flex items-center gap-3">
             {parentData.newParent?.profileImage !== null ? (
               <Avatar
-                name={parentData.newParent.name}
-                profileImage={parentData.newParent.profileImage}
+                name={parentData.newParent?.firstName ?? ""}
+                profileImage={parentData.newParent?.profileImage ?? null}
               />
             ) : (
               <div className="my-auto flex h-10 w-10 items-center justify-center rounded-full border bg-amber-200 font-bold">
-                {parentData.newParent.name.charAt(0).toUpperCase()}
+                {(parentData.newParent?.firstName ?? "")
+                  .charAt(0)
+                  .toUpperCase()}
               </div>
             )}
             <div className="flex-1">
               <p className="text-sm font-extrabold text-gray-800">
-                {parentData.newParent.name}
+                {parentData.newParent.lastName}
+                {parentData.newParent.firstName}
               </p>
               <p className="text-[10px] text-gray-400">
                 Parent Account · Will be created
@@ -147,7 +154,14 @@ const ConfirmStep = ({ formData, isLoading, onSubmit, onBack }: Props) => {
           <p className="mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
             Parent Details
           </p>
-          <InfoRow label="Full Name" value={parentData.newParent.name} />
+          <InfoRow
+            label="Full Name"
+            value={`${studentInfo.firstName} ${studentInfo.lastName}`}
+          />
+          <InfoRow
+            label="Full Name"
+            value={`${studentInfo.firstName} ${studentInfo.lastName}`}
+          />
           <InfoRow label="Email" value={parentData.newParent.email} />
           <InfoRow label="Phone" value={parentData.newParent.phone || "—"} />
           <InfoRow
@@ -158,7 +172,11 @@ const ConfirmStep = ({ formData, isLoading, onSubmit, onBack }: Props) => {
             label="Role"
             value={<span className="text-indigo-600">parent</span>}
           />
-          <InfoRow label="Linked To" value={studentInfo.name} accent />
+          <InfoRow
+            label="Linked To"
+            value={`${studentInfo.firstName} ${studentInfo.lastName}`}
+            accent
+          />
         </SummaryCard>
       )}
 
@@ -194,7 +212,11 @@ const ConfirmStep = ({ formData, isLoading, onSubmit, onBack }: Props) => {
             label="Already Parent Of"
             value={parentData.existingParent.linkedChildren || "—"}
           />
-          <InfoRow label="Will Also Parent" value={studentInfo.name} accent />
+          <InfoRow
+            label="Will Also Parent"
+            value={`${studentInfo.firstName} ${studentInfo.lastName}`}
+            accent
+          />
         </SummaryCard>
       )}
 

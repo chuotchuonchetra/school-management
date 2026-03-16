@@ -15,7 +15,8 @@ export interface StudentFormData {
 }
 
 const EMPTY_STUDENT: StudentInfoData = {
-  name: "",
+  firstName: "",
+  lastName: "",
   studentNumber: "",
   email: "",
   password: "",
@@ -27,12 +28,13 @@ const EMPTY_STUDENT: StudentInfoData = {
 const EMPTY_PARENT: ParentData = {
   mode: "none",
   newParent: {
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     phone: "",
     relationship: "Father",
-    profileImage: "",
+    profileImage: null,
   },
   existingParentId: undefined,
   existingParent: undefined,
@@ -75,7 +77,7 @@ export const StudentForm = ({ onClose }: Props) => {
       setIsLoading(true)
       const { studentInfo, parentData } = formData
       const body: CreateStudentRequest = {
-        name: studentInfo.name,
+        name: `${studentInfo.lastName + studentInfo.firstName}`,
         email: studentInfo.email,
         password: studentInfo.password,
         studentNumber: studentInfo.studentNumber,
@@ -84,8 +86,12 @@ export const StudentForm = ({ onClose }: Props) => {
         profileImage: studentInfo.profileImage,
       }
 
-      if (formData.parentData.mode == "new") {
-        body.newParent = parentData.newParent
+      if (parentData.mode === "new" && parentData.newParent) {
+        const { firstName, lastName, ...rest } = parentData.newParent
+        body.newParent = {
+          ...rest,
+          name: `${firstName} ${lastName}`.trim(),
+        }
       }
       if (formData.parentData.mode == "existing") {
         body.parentId = parentData.existingParentId
