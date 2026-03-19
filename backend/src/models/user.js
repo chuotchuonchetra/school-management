@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "userId",
         as: "studentProfile",
       });
+      User.hasOne(models.Parent, {
+        foreignKey: "userId",
+        as: "parentProfile",
+      });
 
       // parent user has many students (children)
       User.hasMany(models.Student, { foreignKey: "parentId", as: "children" });
@@ -30,10 +34,14 @@ module.exports = (sequelize, DataTypes) => {
       firstName: DataTypes.STRING,
       lastName: DataTypes.STRING,
       email: DataTypes.STRING,
+      password: DataTypes.STRING,
+      role: DataTypes.ENUM("admin", "teacher", "student", "parent"),
+      profileImage: DataTypes.STRING,
     },
     {
       sequelize,
       modelName: "User",
+      table: "Users",
     },
   );
   return User;

@@ -5,14 +5,12 @@ import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { ProtectedRoute } from "./ProtectedRoute"
 import { StudentsPage } from "@/pages/admin/StudentsPage"
 import { TeacherDashboard } from "@/pages/teacher/TeacherDashboard"
+import LoginPage from "@/pages/auth/LoginPage"
 export const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={<LoginForm className="px-10 py-25 lg:p-25"></LoginForm>}
-        />
+        <Route path="/" element={<LoginPage />} />
         <Route
           path="/login"
           element={<LoginForm className="px-10 py-25 lg:p-25" />}

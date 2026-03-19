@@ -58,8 +58,8 @@ export interface StudentInfoData {
 
 // ── New parent (used in add + edit parent forms) ──────────────
 export interface NewParentData {
-  firstName?: string
-  lastName?: string
+  firstName: string
+  lastName: string
   email: string
   password: string
   phone: string

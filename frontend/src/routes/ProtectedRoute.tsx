@@ -5,14 +5,11 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
-  //   const { user } = useAuth()
-  //   const userRole = localStorage.getItem("role")
-  const userRole = allowedRoles
+  const userRole = localStorage.getItem("role")
   if (!userRole) return <Navigate to="/login" />
 
-  if (!allowedRoles.includes(userRole)) {
-    console.log(allowedRoles, userRole)
-    return <Navigate to={`/${userRole}`} /> // redirect to their own dashboard
+  if (userRole !== allowedRoles) {
+    return <Navigate to="/login" />
   }
 
   return <Outlet />

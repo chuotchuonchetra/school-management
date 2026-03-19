@@ -1,43 +1,50 @@
-'use strict';
+"use strict";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Timetables', {
+    await queryInterface.createTable("Timetables", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       classId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       subjectId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       day: {
-        type: Sequelize.ENUM
+        type: Sequelize.ENUM(
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thuesday",
+          "friday",
+          "saturday",
+        ),
       },
       startTime: {
-        type: Sequelize.TIME
+        type: Sequelize.TIME,
       },
       endTime: {
-        type: Sequelize.TIME
+        type: Sequelize.TIME,
       },
       room: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Timetables');
-  }
+    await queryInterface.dropTable("Timetables");
+  },
 };
