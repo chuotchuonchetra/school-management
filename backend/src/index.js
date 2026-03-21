@@ -27,6 +27,7 @@ app.use(morgan("dev")); // logs every request in terminal
 // ── Routes ────────────────────────────────────────────────────
 app.use("/api", userRoutes);
 app.use("/api", require("../src/routes/studentRoutes"));
+app.use("/api", require("../src/routes/parentRoute"));
 
 // app.use("/api", studentRoutes)
 // app.use("/api", teacherRoutes)

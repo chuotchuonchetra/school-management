@@ -35,13 +35,13 @@ export interface Student {
 export interface StudentListItem {
   id: number
   studentNumber: string
-  name: string // from user.name
+  name: string // from user.firstname + lastnae
   email: string // from user.email
   profileImage: string | null // from user.profileImage
   className: string // from class.name
   parentName: string | null // from parent user.name
-  attendanceRate: number | null // null = no records yet
-  isAtRisk: boolean // true if attendanceRate < 75
+  // attendanceRate: number | null // null = no records yet
+  // isAtRisk: boolean // true if attendanceRate < 75
 }
 
 // ── Add student form step 1 ───────────────────────────────────
@@ -104,7 +104,8 @@ export interface StudentFormData {
 
 // ── POST /api/students ────────────────────────────────────────
 export interface CreateStudentRequest {
-  name: string // firstName + lastName combined
+  firstName: string
+  lastName: string
   email: string
   password: string
   studentNumber: string
@@ -114,7 +115,8 @@ export interface CreateStudentRequest {
   parentId?: number // mode === "existing"
   newParent?: {
     // mode === "new"
-    name: string // firstName + lastName combined
+    firstName: string
+    lastName: string
     email: string
     password: string
     phone: string

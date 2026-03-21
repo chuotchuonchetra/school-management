@@ -68,8 +68,8 @@ export const StudentInfo = ({ onClose, studentInfoData }: StudentInfoProp) => {
             <label htmlFor="name">First Name*</label>
             <Input
               className="mt-2 py-4.5"
-              placeholder="Name"
-              name="fristName"
+              placeholder="First Name"
+              name="firstName"
               value={form.firstName}
               onChange={handleInputForm}
             />
@@ -78,7 +78,7 @@ export const StudentInfo = ({ onClose, studentInfoData }: StudentInfoProp) => {
             <label htmlFor="name">Last Name*</label>
             <Input
               className="mt-2 py-4.5"
-              placeholder="Name"
+              placeholder="Last Name"
               name="lastName"
               value={form.lastName}
               onChange={handleInputForm}

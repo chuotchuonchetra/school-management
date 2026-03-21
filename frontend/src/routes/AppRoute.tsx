@@ -17,7 +17,7 @@ export const AppRouter = () => {
         />
         <Route element={<ProtectedRoute allowedRoles={"admin"} />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/students" element={<StudentsPage />} />
             {/* <Route path="/admin/students" element={<StudentsPage />} />
           <Route path="/admin/teachers" element={<TeachersPage />} /> */}
@@ -26,7 +26,7 @@ export const AppRouter = () => {
         {/* Teacher only */}
         <Route element={<ProtectedRoute allowedRoles={"teacher"} />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/teacher" element={<TeacherDashboard />} />
+            <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
             {/* <Route path="/teacher/attendance" element={<AttendancePage />} /> */}
             {/* <Route path="/teacher/grades" element={<GradesPage />} /> */}
           </Route>

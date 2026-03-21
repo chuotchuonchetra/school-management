@@ -2,12 +2,9 @@ import { useState } from "react"
 import { StudentInfo } from "./student-form/StudentInfo"
 import { ParentInfo } from "./student-form/ParentInfo"
 
-import type {
-  CreateStudentRequest,
-  ParentData,
-  StudentInfoData,
-} from "@/types/student.types"
+import type { ParentData, StudentInfoData } from "@/types/student.types"
 import ConfirmStep from "./student-form/ComfirmCreate"
+import axios from "axios"
 
 export interface StudentFormData {
   studentInfo: StudentInfoData
@@ -72,33 +69,115 @@ export const StudentForm = ({ onClose }: Props) => {
   }
   // const nextStep = () => setStep((s) => s + 1)
   const prevStep = () => setStep((s) => s - 1)
-  const onSubmit = () => {
+  // const onSubmit = async () => {
+  //   try {
+  //     setIsLoading(true)
+  //     const { studentInfo, parentData } = formData
+  //     const body: CreateStudentRequest = {
+  //       firstName: studentInfo.firstName,
+  //       lastName: studentInfo.lastName,
+  //       email: studentInfo.email,
+  //       password: studentInfo.password,
+  //       studentNumber: studentInfo.studentNumber,
+  //       classId: Number(studentInfo.classId),
+  //       academicYear: studentInfo.academicYear,
+  //       profileImage: studentInfo.profileImage,
+  //     }
+
+  //     if (parentData.mode === "new" && parentData.newParent) {
+  //       body.newParent = parentData.newParent
+  //     }
+  //     if (formData.parentData.mode == "existing") {
+  //       body.parentId = parentData.existingParentId
+  //     }
+  //     const token = localStorage.getItem("token")
+  //     console.log(token)
+  //     console.log("body", body)
+  //     const response = await axios.post(
+  //       "http://localhost:5000/api/students",
+  //       body,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     )
+  //     console.log("response", response.data)
+  //     onClose(true)
+  //   } catch (error: any) {
+  //     console.log(error.response.data)
+  //   } finally {
+  //     setIsLoading(false)
+  //   }
+  // }
+  const onSubmit = async () => {
     try {
       setIsLoading(true)
       const { studentInfo, parentData } = formData
-      const body: CreateStudentRequest = {
-        name: `${studentInfo.lastName + studentInfo.firstName}`,
-        email: studentInfo.email,
-        password: studentInfo.password,
-        studentNumber: studentInfo.studentNumber,
-        classId: studentInfo.classId as number,
-        academicYear: studentInfo.academicYear,
-        profileImage: studentInfo.profileImage,
+
+      // Switch from plain object to FormData
+      const form = new window.FormData()
+
+      // ── Student fields ──
+      form.append("firstName", studentInfo.firstName)
+      form.append("lastName", studentInfo.lastName)
+      form.append("email", studentInfo.email)
+      form.append("password", studentInfo.password)
+      form.append("studentNumber", studentInfo.studentNumber)
+      form.append("classId", String(studentInfo.classId))
+      form.append("academicYear", studentInfo.academicYear)
+
+      // Only append if user picked a file
+      if (studentInfo.profileImage instanceof File) {
+        form.append("profileImage", studentInfo.profileImage)
       }
 
+      // ── Parent: new ──
       if (parentData.mode === "new" && parentData.newParent) {
-        const { firstName, lastName, ...rest } = parentData.newParent
-        body.newParent = {
-          ...rest,
-          name: `${firstName} ${lastName}`.trim(),
+        const p = parentData.newParent
+        // form.append("parentMode", "new")
+        form.append("parent.firstName", p.firstName)
+        form.append("parent.lastName", p.lastName)
+        form.append("parent.email", p.email)
+        form.append("parent.password", p.password)
+        form.append("parent.phone", p.phone)
+        form.append("parent.relationship", p.relationship)
+
+        if (p.profileImage instanceof File) {
+          form.append("parentImage", p.profileImage)
         }
       }
-      if (formData.parentData.mode == "existing") {
-        body.parentId = parentData.existingParentId
+
+      // ── Parent: existing ──
+      if (parentData.mode === "existing" && parentData.existingParentId) {
+        form.append("parentMode", "existing")
+        form.append("parentId", String(parentData.existingParentId))
       }
-      console.log("body", body)
-    } catch (error) {
-      console.log(error)
+
+      // ── No parent ──
+      if (parentData.mode === "none") {
+        form.append("parentMode", "none")
+      }
+
+      const token = localStorage.getItem("token")
+      console.log(form)
+      const response = await axios.post(
+        "http://localhost:5000/api/students",
+        form,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            // Do NOT set Content-Type manually — axios sets it
+            // automatically with the correct multipart boundary
+          },
+        }
+      )
+
+      console.log("response", response.data)
+      onClose(true)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.log(error.response?.data)
     } finally {
       setIsLoading(false)
     }

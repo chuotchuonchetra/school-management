@@ -13,6 +13,7 @@ import React, { useState } from "react"
 import type { role } from "@/constants/roles"
 import { loginAuth } from "../hooks/useAuth"
 import { useNavigate } from "react-router-dom"
+import { getRoleRedirect } from "@/utils/roleRedirect"
 export function LoginForm({
   className,
   ...props
@@ -30,21 +31,12 @@ export function LoginForm({
         password,
         role: roleSelect,
       })
-      const role = data.user.role
-      if (role === "admin") {
-        navigate("/admin")
-      }
-
-      if (role === "student") {
-        navigate("/student")
-      }
-
-      if (role === "teacher") {
-        navigate("/teacher")
-      }
-
-      if (role === "parent") {
-        navigate("/parent")
+      console.log(data)
+      const result = getRoleRedirect()
+      if (result) {
+        navigate(result.path)
+      } else {
+        navigate("/login")
       }
     } catch (error) {
       console.log(error)

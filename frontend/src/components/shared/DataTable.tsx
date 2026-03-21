@@ -3,16 +3,18 @@ interface DataTableProps<T> {
   data: T[] // ✅ Now accepts any array
   renderRow: (item: T) => React.ReactNode // ✅ Parent decides how to draw the row
   onEdit?: (item: T) => void
+  isLoadig: boolean
 }
 
 export const DataTable = <T extends { id: number | string }>({
   thead,
   data,
   renderRow,
+  isLoadig,
 }: DataTableProps<T>) => {
   return (
     <div className="rounded-2xl p-4">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overflow-y-hidden">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-gray-50 text-xs font-medium tracking-wider text-gray-400 uppercase">
@@ -24,14 +26,26 @@ export const DataTable = <T extends { id: number | string }>({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {data.map((item) => (
-              <tr
-                key={item.id}
-                className="group transition-colors hover:bg-gray-50/50"
-              >
-                {renderRow(item)}
+            {isLoadig ? (
+              <tr>
+                {/* Set colSpan to the total number of columns in your table */}
+                <td colSpan={thead.length} className="p-10">
+                  <div className="flex w-full items-center justify-center">
+                    Loading
+                    <div className="ms-2 h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-t-transparent"></div>
+                  </div>
+                </td>
               </tr>
-            ))}
+            ) : (
+              data.map((item) => (
+                <tr
+                  key={item.id}
+                  className="group transition-colors hover:bg-gray-50/50"
+                >
+                  {renderRow(item)}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

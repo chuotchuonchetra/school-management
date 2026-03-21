@@ -57,7 +57,9 @@ export const CreateNewParent = ({
       },
     }))
   }
-
+  // const selectedParentType = relationship.find(
+  //   (relationship) => relationship.id === form.classId
+  // )
   const handleSelectChange = (value: string) => {
     setForm((prev) => ({
       ...prev,
@@ -87,8 +89,8 @@ export const CreateNewParent = ({
             <label htmlFor="name">First Name*</label>
             <Input
               className="mt-2 py-4.5"
-              placeholder="Name"
-              name="name"
+              placeholder="First Name"
+              name="firstName"
               value={form.newParent?.firstName}
               onChange={handleInputForm}
             />
@@ -97,8 +99,8 @@ export const CreateNewParent = ({
             <label htmlFor="name">Last Name*</label>
             <Input
               className="mt-2 py-4.5"
-              placeholder="Name"
-              name="name"
+              placeholder="Last Name"
+              name="lastName"
               value={form.newParent?.lastName}
               onChange={handleInputForm}
             />
@@ -110,10 +112,7 @@ export const CreateNewParent = ({
               onValueChange={() => handleSelectChange}
             >
               <SelectTrigger className="mt-2 w-full py-4.5">
-                <SelectValue placeholder="Select Relationship">
-                  {/* {selectedRelationship?.label} */}
-                  Select Relationship
-                </SelectValue>
+                <SelectValue placeholder="Select a relationship" />
               </SelectTrigger>
 
               <SelectContent>

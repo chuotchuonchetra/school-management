@@ -11,7 +11,7 @@ const list: listI[] = [
   {
     icon: <LayoutDashboard size={14} />,
     listLebel: "Dashboard",
-    path: "/admin",
+    path: "/admin/dashboard",
   },
   { icon: <User size={14} />, listLebel: "Students", path: "/admin/students" },
 ]
