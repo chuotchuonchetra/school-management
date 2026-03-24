@@ -1,34 +1,59 @@
 const router = require("express").Router();
-const multer = require("multer"); // ← was missing
-const {
-  getAllStudent,
-  createStudent,
-} = require("../controllers/Student.controller");
+
+
 const {
   authMiddleware,
   roleMiddleware,
 } = require("../middleware/authMiddleware");
+const {
+  getAllStudent,
+  getStudentById,
+  getStudents,
+  createStudent,
+  updateStudent,
+  deleteStudent,
+} = require("../controllers/Student.controller");
 
-const upload = multer({ storage: multer.memoryStorage() });
 
-const uploadFields = upload.fields([
-  { name: "profileImage", maxCount: 1 },
-  { name: "parentProfileImage", maxCount: 1 },
-]);
 
+// GET /api/students?search=sophea&classId=1&page=1
 router.get(
   "/students",
   authMiddleware,
-  roleMiddleware(["admin"]),
+  roleMiddleware(["admin", "teacher"]), // teacher can also view students
   getAllStudent,
 );
 
+// GET /api/students/:id  — full student for edit modal
+router.get(
+  "/students/:id",
+  authMiddleware,
+  roleMiddleware(["admin", "teacher"]),
+  getStudentById,
+);
+
+// POST /api/students  — uploadFields before createStudent (handles images)
 router.post(
   "/students",
   authMiddleware,
   roleMiddleware(["admin"]),
-  uploadFields,
   createStudent,
+);
+
+// PATCH /api/students/:id  — uploadFields handles profile image changes
+router.patch(
+  "/students/:id",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  updateStudent,
+);
+
+// DELETE /api/students/:id
+router.delete(
+  "/students/:id",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  deleteStudent,
 );
 
 module.exports = router;

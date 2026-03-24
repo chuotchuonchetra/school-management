@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select"
 import { ImageUpload } from "@/components/shared/ImageUpload"
 import { useState } from "react"
-import type { StudentListItem } from "@/types/student.types"
+
 import type {
   EditStudentFormData,
   ProfileImageState,
@@ -35,8 +35,10 @@ const classes = [
 // ── Props ─────────────────────────────────────────────────────
 interface Props {
   isEdit: boolean
-  student: StudentListItem
+  student: any
   onClose: () => void
+  onSuccess: () => void
+  
 }
 const SectionLabel = ({ icon, label }: { icon: string; label: string }) => (
   <div className="flex items-center gap-1.5 border-b pb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
@@ -46,15 +48,17 @@ const SectionLabel = ({ icon, label }: { icon: string; label: string }) => (
 
 // ─────────────────────────────────────────────────────────────
 export const EditStudentForm = ({ isEdit, student, onClose }: Props) => {
+  console.log(student)
   const [form, setForm] = useState<EditStudentFormData>({
-    name: student.name,
+    name: `${student.user.firstName} ${student.user.lastName}`,
     studentNumber: student.studentNumber,
-    email: student.email,
-    classId: 0,
+    email: student.user.email,
+    classId: student.classId,
     profileImage: { status: "unchanged", url: student.profileImage },
-    newPassword: "",
-    confirmPassword: "",
+    newPassword: student.user.password,
+    confirmPassword: student.user.password,
     parentEdit: { mode: "keep" },
+   
   })
 
   const set = (field: keyof EditStudentFormData, value: unknown) =>
@@ -69,6 +73,7 @@ export const EditStudentForm = ({ isEdit, student, onClose }: Props) => {
 
   const currentImageUrl: string | null =
     form.profileImage.status === "unchanged" ? form.profileImage.url : null
+    
 
   return (
     <Dialog open={isEdit} onOpenChange={(open) => !open && onClose()}>
@@ -82,7 +87,7 @@ export const EditStudentForm = ({ isEdit, student, onClose }: Props) => {
             ✏️ Edit Student
           </DialogTitle>
           <p className="text-[11px] text-gray-400">
-            {student.name} · {student.studentNumber} · {student.className}
+            {student.user.firstName} {student.user.lastName} · {student.studentNumber} · {student.classname}
           </p>
         </DialogHeader>
 

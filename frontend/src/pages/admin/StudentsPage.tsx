@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
-  //   DialogDescription,
   DialogHeader,
   DialogTrigger,
   DialogTitle,
@@ -20,332 +19,314 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { StudentListItem } from "@/types/student.types"
-import axios from "axios"
-import { Plus } from "lucide-react"
-import { useEffect, useState } from "react"
-import { toast } from "sonner"
 
-interface StatCardType {
-  title: string
-  value: string | number
-  color?: string
-  subText?: string
-}
-const studentStatCard: StatCardType[] = [
-  {
-    title: "total",
-    value: 1240,
-  },
-  {
-    title: "active",
-    value: 1198,
-  },
-  {
-    title: "new this month",
-    value: 12,
-  },
-  {
-    title: "low attendance",
-    value: 23,
-  },
+// ── TanStack ──────────────────────────────────────────────────
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { deleteStudent } from "@/api/student.api"
+import { getStudentById } from "@/api/student.api"
+
+// ── Hooks & Types ─────────────────────────────────────────────
+import { useStudents } from "@/hooks/useStudents"
+import type { StudentListItem } from "@/types/student.types"
+import { Plus } from "lucide-react"
+import { useState } from "react"
+
+// ─────────────────────────────────────────────────────────────
+//  STAT CARDS
+// ─────────────────────────────────────────────────────────────
+const studentStatCard = [
+  { title: "total", value: 1240 },
+  { title: "active", value: 1198 },
+  { title: "new this month", value: 12 },
+  { title: "low attendance", value: 23 },
 ]
-const thead: string[] = [
+
+const thead = [
+  "no",
   "student",
   "studentid",
   "class",
-  "attendence",
   "parentname",
+  "attendence",
   "status",
   "action",
 ]
-// const recentStudents: StudentListItem[] = [
-//   {
-//     id: 1,
-//     studentNumber: "STU-2026-001",
-//     name: "Alex Thompson",
-//     email: "alex.t@school.edu",
-//     profileImage:
-//       "https://i.pinimg.com/736x/e5/de/b4/e5deb4d86e6bed2a3ae303dce1a201fe.jpg",
-//     className: "10-A",
-//     parentName: "Sarah Thompson",
-//     attendanceRate: 98.5,
-//     isAtRisk: false,
-//   },
-//   {
-//     id: 2,
-//     studentNumber: "STU-2026-002",
-//     name: "Jordan Rivera",
-//     email: "j.rivera@school.edu",
-//     profileImage: null,
-//     className: "10-B",
-//     parentName: "Carlos Rivera",
-//     attendanceRate: 82.0,
-//     isAtRisk: false,
-//   },
-//   {
-//     id: 3,
-//     studentNumber: "STU-2026-003",
-//     name: "Samira Khan",
-//     email: "s.khan@school.edu",
-//     profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=Samira",
-//     className: "10-A",
-//     parentName: "Amina Khan",
-//     attendanceRate: 100.0,
-//     isAtRisk: false,
-//   },
-//   {
-//     id: 4,
-//     studentNumber: "STU-2026-004",
-//     name: "Liam O'Connor",
-//     email: "liam.oc@school.edu",
-//     profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=Liam",
-//     className: "12-C",
-//     parentName: null,
-//     attendanceRate: 74.0,
-//     isAtRisk: true,
-//   },
-//   {
-//     id: 5,
-//     studentNumber: "STU-2026-005",
-//     name: "Chloe Chen",
-//     email: "c.chen@school.edu",
-//     profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=Chloe",
-//     className: "11-B",
-//     parentName: "David Chen",
-//     attendanceRate: 92.1,
-//     isAtRisk: false,
-//   },
-// ]
-const getAvatarColor = (name: string) => {
-  const colors = [
-    "bg-red-500",
-    "bg-blue-500",
-    "bg-green-500",
-    "bg-yellow-500",
-    "bg-purple-500",
-    "bg-pink-500",
-    "bg-indigo-500",
-  ]
-  // Use name charCode so the same person always gets the same color
-  return colors[name.charCodeAt(0) % colors.length]
-}
 
-// Progress bar color based on attendance rate
-const getBarColor = (rate: number | null) => {
-  if (rate === null) return "bg-gray-300"
+// ─────────────────────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────────────────────
+const getBarColor = (rate: number) => {
   if (rate >= 90) return "bg-green-500"
-  if (rate >= 75) return "bg-yellow-500"
+  if (rate >= 75) return "bg-blue-500"
+  if (rate >= 60) return "bg-yellow-500"
   return "bg-red-500"
 }
+
+const getClassColor = (className: string) => {
+  const colors = [
+    "bg-blue-100 text-blue-600",
+    "bg-purple-100 text-purple-600",
+    "bg-green-100 text-green-600",
+    "bg-orange-100 text-orange-600",
+  ]
+  return colors[className.charCodeAt(0) % colors.length]
+}
+
+const getStatus = (rate: number) => (rate < 70 ? "Low Att." : "Active")
+const getStatusColor = (rate: number) =>
+  rate < 70 ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
+
+// ─────────────────────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────────────────────
 export const StudentsPage = () => {
-  const [data, setData] = useState<StudentListItem[]>([])
-  const [isLoading, setIsLoading] = useState<boolean>()
+  // ── 1. Filter state ───────────────────────────────────────
+  // These drive the queryKey — changing them auto-refetches
+  const [search, setSearch] = useState("")
+  const [classId, setClassId] = useState<number | undefined>()
 
-  useEffect(() => {
-    const getApi = async () => {
-      try {
-        setIsLoading(true)
-        const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/students", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        const formattedData: StudentListItem[] = res.data.data.map(
-          (student: any) => ({
-            id: student.id,
-            studentNumber: student.studentNumber,
+  // ── 2. Fetch student list with filters ────────────────────
+  // useStudents passes { search, classId } to the API
+  // queryKey = ["students", { search, classId }]
+  // → changes to search or classId trigger a new fetch automatically
+  const { data = [], isLoading, error } = useStudents()
 
-            name:
-              `${student.user?.firstName ?? ""} ${student.user?.lastName ?? ""}`.trim() ||
-              "Unknown",
-            email: student.user?.email || "",
-            profileImage: student.user?.profileImage || null,
-
-            className: `Class ${student.classId}`,
-
-            parentName: student.parent?.user
-              ? `${student.parent.user.firstName ?? ""} ${student.parent.user.lastName ?? ""}`.trim()
-              : "—",
-          })
-        )
-        setData(formattedData)
-      } catch (error) {
-        console.log(error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    getApi()
-  }, [])
-
-  const [isOpen, setIsOpen] = useState<boolean>(false)
+  // ── 3. Modal state ────────────────────────────────────────
+  const [isOpen, setIsOpen] = useState(false)
   const [isEdit, setIsEdit] = useState(false)
-  const [selectedStudent, setSelectedStudent] =
-    useState<StudentListItem | null>(null)
+  const [loadingId, setLoadingId] = useState<number | null>(null)
 
-  // ── Handler ──
-  const handleEditClick = (student: StudentListItem) => {
-    setSelectedStudent(student)
-    setIsEdit(true)
+  // ── 4. Full student for edit modal (Student, not StudentListItem)
+  // We fetch the full student object only when Edit is clicked
+  // StudentListItem doesn't have enough parent data to pre-fill the form
+  const [editTarget, setEditTarget] = useState<any | null>(null)
+
+  // ── 5. queryClient — used to refresh list after mutations ─
+  const queryClient = useQueryClient()
+
+  // ── 6. Delete mutation ────────────────────────────────────
+  // useMutation wraps the delete API call
+  // onSuccess → invalidateQueries tells TanStack to refetch ["students"]
+  // This means the table refreshes automatically after a delete
+  const deleteMutation = useMutation({
+    mutationFn: deleteStudent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["students"] })
+    },
+  })
+
+  // ── 7. Edit click — fetch full student first ──────────────
+  // We can't use the StudentListItem from the table because it's
+  // missing full parent data (phone, relationship, profileImage etc.)
+  // So we call GET /api/students/:id to get the complete object
+  const handleEditClick = async (student: StudentListItem) => {
+    console.log(student.id, student.name)
+    
+    setLoadingId(student.id) // show spinner on that row
+    try {
+      const res = await getStudentById(student.id)
+      setEditTarget(res.data) 
+      setIsEdit(true)
+    } catch (err) {
+      console.error("Failed to load student", err)
+    } finally {
+      setLoadingId(null) 
+    }
   }
-  const handleModal = () => {
-    setIsOpen(!isOpen)
-  }
+
+  if (error) return <p>Error loading students</p>
 
   return (
     <div>
+      {/* Stat cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {studentStatCard.map((card) => (
-          <div key={card.title}>
-            <StatCard {...card} />
-          </div>
+          <StatCard key={card.title} {...card} />
         ))}
       </div>
+
       <div className="mt-6 rounded-2xl border shadow-md">
-        <div className="grid grid-cols-4 items-center p-6">
+        {/* Top bar */}
+        <div className="grid grid-cols-4 items-center gap-3 p-6">
+          {/* Search — onChange updates state → triggers refetch */}
           <Input
-            type="text"
             placeholder="Search students by name or ID..."
             className="h-9"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
-          <Select>
-            <SelectTrigger className="w-45 py-4.5">
-              <SelectValue placeholder="Theme" />
+
+          {/* Class filter — onValueChange updates state → triggers refetch */}
+          <Select
+            value={classId ? String(classId) : ""}
+            onValueChange={(v) => setClassId(v ? Number(v) : undefined)}
+          >
+            <SelectTrigger className="w-45">
+              <SelectValue placeholder="All Classes" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
+                <SelectItem value="">All Classes</SelectItem>
+                <SelectItem value="1">Class 10A</SelectItem>
+                <SelectItem value="2">Class 10B</SelectItem>
+                <SelectItem value="3">Class 11A</SelectItem>
+                <SelectItem value="4">Class 11B</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
+
           <Select>
-            <SelectTrigger className="w-45 py-4.5">
-              <SelectValue placeholder="Theme" />
+            <SelectTrigger className="w-45">
+              <SelectValue placeholder="All Grades" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
+                <SelectItem value="A">A</SelectItem>
+                <SelectItem value="B">B</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
-          <Dialog open={isOpen} onOpenChange={handleModal}>
-            <DialogTrigger
-              onClick={() => handleModal()}
-              className={
-                "text-md flex w-42 items-center justify-center rounded-md border bg-blue-500 p-1.5 text-white"
-              }
-            >
-              <Plus size={14} /> <span> Add New Student</span>
+
+          {/* Add student dialog */}
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger className="flex w-50 items-center justify-center rounded-md bg-blue-500 p-1 text-white">
+              <Plus size={14} /> Add Student
             </DialogTrigger>
+
             <DialogContent size="xl">
               <DialogHeader>
-                <DialogTitle></DialogTitle>
-
-                <div className="">
-                  <StudentForm onClose={handleModal} />
-                </div>
+                <DialogTitle>Add Student</DialogTitle>
               </DialogHeader>
+
+              <StudentForm
+                onClose={() => setIsOpen(false)}
+                // After successful create → close modal + refresh list
+                onSuccess={() => {
+                  setIsOpen(false)
+                  queryClient.invalidateQueries({ queryKey: ["students"] })
+                }}
+              />
             </DialogContent>
           </Dialog>
         </div>
 
+        {/* Table */}
         <DataTable
-          isLoadig={isLoading!}
+          isLoading={isLoading}
           thead={thead}
-          data={data} // Your mock data
-          renderRow={(student) => (
-            <>
-              {/* ── Avatar + Name (Styled Cell) ── */}
-              <td className="py-3 pr-4">
-                <div className="flex items-center gap-3">
-                  {student.profileImage ? (
-                    <img
-                      src={student.profileImage}
-                      className="h-8 w-8 rounded-full border object-cover"
-                    />
-                  ) : (
-                    <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white ${getAvatarColor(student.name)}`}
-                    >
-                      {student.name.charAt(0)}
+          data={data}
+          renderRow={(student) => {
+            // const attendance = student.attendanceRate ?? 0
+            const attendance = 0
+
+            return (
+              <>
+                <td>{student.id}</td>
+
+                {/* Student name + avatar */}
+                <td className="py-3 pr-4">
+                  <div className="flex items-center gap-3">
+                    {student.profileImage ? (
+                      <img
+                        src={student.profileImage}
+                        className="h-9 w-9 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white">
+                        {student.name.charAt(0)}
+                      </div>
+                    )}
+                    <div>
+                      <div className="text-sm font-semibold">
+                        {student.name}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {student.email}
+                      </div>
                     </div>
-                  )}
-                  <span className="text-sm font-semibold text-slate-700">
-                    {student.name}
-                  </span>
-                </div>
-              </td>
-
-              {/* ── Student Number ── */}
-              <td className="py-3 pr-4 text-sm text-gray-500 uppercase">
-                {student.studentNumber}
-              </td>
-
-              {/* ── Class ── */}
-              <td className="py-3 pr-4 text-sm text-gray-500">
-                {student.className}
-              </td>
-              <td className="py-3 pr-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-1.5 w-24 flex-1 rounded-full bg-gray-200">
-                    <div
-                    // className={`h-1.5 rounded-full ${getBarColor(student.attendanceRate)}`}
-                    // style={{ width: `${student.attendanceRate}%` }}
-                    />
                   </div>
-                  <span className="text-xs font-medium text-gray-400">
-                    {/* {student.attendanceRate}% */}
+                </td>
+
+                <td className="text-sm text-gray-500">
+                  {student.studentNumber}
+                </td>
+
+                <td>
+                  <span
+                    className={`rounded-md px-2 py-1 text-xs font-semibold ${getClassColor(student.className)}`}
+                  >
+                    {student.className}
                   </span>
-                </div>
-              </td>
+                </td>
 
-              {/* ── Parent ── */}
-              <td className="py-3 pr-4 text-sm text-gray-500">
-                {student.parentName ?? "—"}
-              </td>
+                <td className="text-sm text-gray-500">
+                  {student.parentName ?? "—"}
+                </td>
 
-              <td className="py-3 pr-4 text-sm text-gray-500">
-                {/* {student.isAtRisk ? "Rist" : "Active"} */}
-              </td>
+                {/* Attendance bar — uses real attendanceRate from DB */}
+                <td>
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-24 rounded-full bg-gray-200">
+                      <div
+                        className={`h-1.5 rounded-full ${getBarColor(attendance)}`}
+                        style={{ width: `${attendance}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-gray-500">{attendance}%</span>
+                  </div>
+                </td>
 
-              {/* ── Actions ── */}
-              <td className="flex gap-2 py-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEditClick(student)}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    toast.success("Deleted succesfully", {
-                      position: "top-right",
-                    })
-                  }
-                >
-                  Delete
-                </Button>
-              </td>
-            </>
-          )}
+                <td>
+                  <span
+                    className={`rounded-md px-2 py-1 text-xs font-semibold ${getStatusColor(attendance)}`}
+                  >
+                    {getStatus(attendance)}
+                  </span>
+                </td>
+
+                {/* Actions */}
+                <td className="flex gap-2 pt-3">
+                  {/* Edit — fetches full student then opens modal */}
+                  <Button
+                    variant="outline"
+                    disabled={loadingId === student.id}
+                    onClick={() => handleEditClick(student)}
+                    className="rounded border px-2 py-1 text-sm"
+                  >
+                    {loadingId === student.id ? "..." : "Edit"}
+                  </Button>
+
+                  {/* Delete — calls mutation, auto-refreshes table on success */}
+                  <Button
+                    variant="destructive"
+                    disabled={deleteMutation.isPending}
+                    onClick={() => deleteMutation.mutate(student.id)}
+                    className="rounded border px-2 py-1 text-sm"
+                  >
+                    {deleteMutation.isPending ? "..." : "Del"}
+                  </Button>
+                </td>
+              </>
+            )
+          }}
         />
-        {isEdit && selectedStudent && (
+
+        {/* Edit modal — key={editTarget.id} ensures fresh mount per student */}
+        {isEdit && editTarget && (
           <EditStudentForm
+            key={editTarget.id}
+            student={editTarget}
             isEdit={isEdit}
-            key={selectedStudent.id} // Forces re-mount if you switch students
-            student={selectedStudent}
             onClose={() => {
               setIsEdit(false)
-              setSelectedStudent(null)
+              setEditTarget(null)
+            }}
+            onSuccess={() => {
+              setIsEdit(false)
+
+              setEditTarget(null)
+              // refresh the table after a successful edit
+              queryClient.invalidateQueries({ queryKey: ["students"] })
             }}
           />
         )}

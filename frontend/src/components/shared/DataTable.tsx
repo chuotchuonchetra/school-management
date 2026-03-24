@@ -3,14 +3,14 @@ interface DataTableProps<T> {
   data: T[] // ✅ Now accepts any array
   renderRow: (item: T) => React.ReactNode // ✅ Parent decides how to draw the row
   onEdit?: (item: T) => void
-  isLoadig: boolean
+  isLoading: boolean
 }
 
 export const DataTable = <T extends { id: number | string }>({
   thead,
   data,
   renderRow,
-  isLoadig,
+  isLoading,
 }: DataTableProps<T>) => {
   return (
     <div className="rounded-2xl p-4">
@@ -26,7 +26,7 @@ export const DataTable = <T extends { id: number | string }>({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {isLoadig ? (
+            {isLoading ? (
               <tr>
                 {/* Set colSpan to the total number of columns in your table */}
                 <td colSpan={thead.length} className="p-10">
@@ -40,7 +40,7 @@ export const DataTable = <T extends { id: number | string }>({
               data.map((item) => (
                 <tr
                   key={item.id}
-                  className="group transition-colors hover:bg-gray-50/50"
+                  className="group w-full transition-colors hover:bg-gray-50/50"
                 >
                   {renderRow(item)}
                 </tr>

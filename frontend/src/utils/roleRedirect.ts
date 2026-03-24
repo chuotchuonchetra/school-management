@@ -19,7 +19,7 @@ export interface RoleRedirectResult {
 
 // ─── Role → Dashboard route map ───────────────────────────────────────────────
 
-const ROLE_ROUTES: Record<UserRole, string> = {
+export const ROLE_ROUTES: Record<UserRole, string> = {
   admin: "/admin/dashboard",
   teacher: "/teacher/dashboard",
   student: "/student/dashboard",

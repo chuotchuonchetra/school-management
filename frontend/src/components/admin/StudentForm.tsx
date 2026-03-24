@@ -38,6 +38,7 @@ const EMPTY_PARENT: ParentData = {
 }
 interface Props {
   onClose: (data: boolean) => void
+  onSuccess: () => void
 }
 export const StudentForm = ({ onClose }: Props) => {
   const [step, setStep] = useState<number>(1)
@@ -67,49 +68,7 @@ export const StudentForm = ({ onClose }: Props) => {
   const handleModalForm = (data: boolean) => {
     onClose(data)
   }
-  // const nextStep = () => setStep((s) => s + 1)
   const prevStep = () => setStep((s) => s - 1)
-  // const onSubmit = async () => {
-  //   try {
-  //     setIsLoading(true)
-  //     const { studentInfo, parentData } = formData
-  //     const body: CreateStudentRequest = {
-  //       firstName: studentInfo.firstName,
-  //       lastName: studentInfo.lastName,
-  //       email: studentInfo.email,
-  //       password: studentInfo.password,
-  //       studentNumber: studentInfo.studentNumber,
-  //       classId: Number(studentInfo.classId),
-  //       academicYear: studentInfo.academicYear,
-  //       profileImage: studentInfo.profileImage,
-  //     }
-
-  //     if (parentData.mode === "new" && parentData.newParent) {
-  //       body.newParent = parentData.newParent
-  //     }
-  //     if (formData.parentData.mode == "existing") {
-  //       body.parentId = parentData.existingParentId
-  //     }
-  //     const token = localStorage.getItem("token")
-  //     console.log(token)
-  //     console.log("body", body)
-  //     const response = await axios.post(
-  //       "http://localhost:5000/api/students",
-  //       body,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     )
-  //     console.log("response", response.data)
-  //     onClose(true)
-  //   } catch (error: any) {
-  //     console.log(error.response.data)
-  //   } finally {
-  //     setIsLoading(false)
-  //   }
-  // }
   const onSubmit = async () => {
     try {
       setIsLoading(true)
@@ -167,15 +126,13 @@ export const StudentForm = ({ onClose }: Props) => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            // Do NOT set Content-Type manually — axios sets it
-            // automatically with the correct multipart boundary
           },
         }
       )
 
       console.log("response", response.data)
       onClose(true)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.log(error.response?.data)
     } finally {

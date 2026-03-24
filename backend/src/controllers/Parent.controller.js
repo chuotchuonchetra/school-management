@@ -1,13 +1,23 @@
 const db = require("../models");
-const { Parent } = db;
+const { Parent,User } = db;
 const getAllParent = async (req, res) => {
   try {
-    const parents = await Parent.findAll();
+    const parents = await Parent.findAll({
+      include:[
+        {
+        model:User,
+        as:"user"
+      }
+    ]
+    });
     res.status(200).json({
       message: "Fetch parent succesfully",
       data: parents,
     });
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({message:"Internal server error"});
+  }
 };
 
 module.exports = { getAllParent };

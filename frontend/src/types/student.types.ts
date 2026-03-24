@@ -40,6 +40,7 @@ export interface StudentListItem {
   profileImage: string | null // from user.profileImage
   className: string // from class.name
   parentName: string | null // from parent user.name
+  status: string
   // attendanceRate: number | null // null = no records yet
   // isAtRisk: boolean // true if attendanceRate < 75
 }
