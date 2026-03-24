@@ -1,5 +1,6 @@
+const { where } = require("sequelize");
 const db = require("../models");
-const { Parent,User } = db;
+const { Parent,User,Student } = db;
 const getAllParent = async (req, res) => {
   try {
     const parents = await Parent.findAll({
@@ -7,6 +8,16 @@ const getAllParent = async (req, res) => {
         {
         model:User,
         as:"user"
+      },{
+        model:Student,
+        as:"students",
+        include:[
+          {
+            model:User,
+            attributes:["firstName","lastName"],
+            as:"user"
+          }
+        ]
       }
     ]
     });

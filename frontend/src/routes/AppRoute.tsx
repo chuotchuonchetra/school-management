@@ -34,6 +34,7 @@ import { ChildAttendancePage } from "@/pages/parent/ChildAttendancePage"
 
 import AttendancePage from "@/pages/teacher/AttendancePage"
 import { ChildReportCard } from "@/pages/parent/ChildReportCard"
+import ParentManager from "@/test/EditParentSection"
 
 // ─────────────────────────────────────────────────────────────
 export const AppRouter = () => {
@@ -105,7 +106,7 @@ export const AppRouter = () => {
             <Route path="/parent/report-card" element={<ChildReportCard />} />
           </Route>
         </Route>
-
+        <Route path="/testingeditparent" element={<ParentManager/>}/>
         {/* ── 404 — catch all unknown routes ── */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

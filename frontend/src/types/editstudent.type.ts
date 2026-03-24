@@ -33,32 +33,14 @@ export interface ParentEditState {
   mode: ParentEditMode
 
   // mode === 'edit' — fields for editing current parent
-  editedParent?: {
-    name: string
-    email: string
-    phone: string
-    relationship: string
-    profileImage: ProfileImageState
-  }
+  editedParent?: any
 
   // mode === 'change' — pick an existing parent
   newExistingParentId?: number
-  newExistingParent?: {
-    id: number
-    name: string
-    email: string
-    profileImage: string | File | null
-  }
+  newExistingParent?: any
 
   // mode === 'addNew' — create a brand new parent
-  newParent?: {
-    name: string
-    email: string
-    password: string
-    phone: string
-    relationship: string
-    profileImage: ProfileImageState
-  }
+  newParent?: any
 }
 
 // ── Full edit form state ──────────────────────────────────────

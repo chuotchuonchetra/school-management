@@ -12,20 +12,25 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useState, useEffect } from "react"
-import { ImageUpload } from "@/components/shared/ImageUpload"
+// import { ImageUpload } from "@/components/shared/ImageUpload"
 import type {
-  CurrentParent,
+  // CurrentParent,
   ParentEditMode,
   ParentEditState,
-  ParentOption,
-  ProfileImageState,
+  // ParentOption,
+  // ProfileImageState,
 } from "@/types/editstudent.type"
+import { useQuery } from "@tanstack/react-query"
+import { getParents } from "@/api/parent.api"
+import { CheckCircle2, Search, User } from "lucide-react"
+import { ParentCard } from "@/components/shared/ParentCard"
 
 // ─────────────────────────────────────────────────────────────
 //  PROPS
 // ─────────────────────────────────────────────────────────────
 interface Props {
-  currentParent: CurrentParent | null // null = student has no parent
+  parent:any
+  currentParent: any | null // null = student has no parent
   state: ParentEditState
   onChange: (next: ParentEditState) => void
 }
@@ -33,124 +38,52 @@ interface Props {
 // ─────────────────────────────────────────────────────────────
 //  MOCK search — replace with real API call
 // ─────────────────────────────────────────────────────────────
-const searchParents = async (q: string): Promise<ParentOption[]> => {
-  const MOCK: ParentOption[] = [
-    {
-      id: 10,
-      name: "Chan Sopheak",
-      email: "sopheak@gmail.com",
-      phone: "012 987 654",
-      profileImage: null,
-      linkedChildren: ["Dara Chan"],
-    },
-    {
-      id: 11,
-      name: "Channa Pov",
-      email: "channa@gmail.com",
-      phone: "077 123 456",
-      profileImage: null,
-      linkedChildren: ["Kokoma sok", "Jame Sok"],
-    },
-    {
-      id: 12,
-      name: "Channary Kim",
-      email: "channary@gmail.com",
-      phone: "089 654 321",
-      profileImage: null,
-      linkedChildren: ["Kim Sokha"],
-    },
-  ]
-  return MOCK.filter(
-    (p) =>
-      p.name.toLowerCase().includes(q.toLowerCase()) ||
-      p.email.toLowerCase().includes(q.toLowerCase())
-  )
-}
+// const searchParents = async (q: string): Promise<ParentOption[]> => {
+//   const MOCK: ParentOption[] = [
+//     {
+//       id: 10,
+//       name: "Chan Sopheak",
+//       email: "sopheak@gmail.com",
+//       phone: "012 987 654",
+//       profileImage: null,
+//       linkedChildren: ["Dara Chan"],
+//     },
+//     {
+//       id: 11,
+//       name: "Channa Pov",
+//       email: "channa@gmail.com",
+//       phone: "077 123 456",
+//       profileImage: null,
+//       linkedChildren: ["Kokoma sok", "Jame Sok"],
+//     },
+//     {
+//       id: 12,
+//       name: "Channary Kim",
+//       email: "channary@gmail.com",
+//       phone: "089 654 321",
+//       profileImage: null,
+//       linkedChildren: ["Kim Sokha"],
+//     },
+//   ]
+//   return MOCK.filter(
+//     (p) =>
+//       p.name.toLowerCase().includes(q.toLowerCase()) ||
+//       p.email.toLowerCase().includes(q.toLowerCase())
+//   )
+// }
 
 // ─────────────────────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────────────────────
-export const ParentSection = ({ currentParent, state, onChange }: Props) => {
+export const ParentSection = ({ currentParent, state, onChange ,parent}: Props) => {
+  console.log(parent)
+  const [parents,setParents] = useState<any[]>([])
+  const [selectedParent, setSelectedParent] = useState<string | null>("Keo Bunna");
+  const studentName = "Piseth Keo";
   const hasParent = currentParent !== null
-
-  // Search state (used in "change" tab)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [searchResults, setSearchResults] = useState<ParentOption[]>([])
-  const [searching, setSearching] = useState(false)
-
-  // Debounced search
-  useEffect(() => {
-    if (state.mode !== "change") return
-    const t = setTimeout(async () => {
-      setSearching(true)
-      const r = await searchParents(searchQuery)
-      setSearchResults(r)
-      setSearching(false)
-    }, 300)
-    return () => clearTimeout(t)
-  }, [searchQuery, state.mode])
-
-  // Pre-fill editedParent when switching to "edit" tab
-  useEffect(() => {
-    if (state.mode === "edit" && currentParent && !state.editedParent) {
-      onChange({
-        ...state,
-        editedParent: {
-          name: currentParent.name,
-          email: currentParent.email,
-          phone: currentParent.phone,
-          relationship: currentParent.relationship,
-          profileImage: {
-            status: "unchanged",
-            url: currentParent.profileImage,
-          },
-        },
-      })
-    }
-  }, [currentParent, onChange, state, state.mode])
-
-  // Pre-fill newParent when switching to "addNew" tab
-  useEffect(() => {
-    if (state.mode === "addNew" && !state.newParent) {
-      onChange({
-        ...state,
-        newParent: {
-          name: "",
-          email: "",
-          password: "",
-          phone: "",
-          relationship: "Father",
-          profileImage: { status: "unchanged", url: null },
-        },
-      })
-    }
-  }, [onChange, state, state.mode])
-
-  // ── Helpers ─────────────────────────────────────────────
+  
   const setMode = (mode: ParentEditMode) => onChange({ ...state, mode })
 
-  const setEditedField = (field: string, value: unknown) =>
-    onChange({
-      ...state,
-      editedParent: { ...state.editedParent!, [field]: value },
-    })
-
-  const setNewParentField = (field: string, value: unknown) =>
-    onChange({ ...state, newParent: { ...state.newParent!, [field]: value } })
-
-  const handleEditedImageChange = (file: File | null) => {
-    const next: ProfileImageState =
-      file !== null ? { status: "changed", file } : { status: "removed" }
-    setEditedField("profileImage", next)
-  }
-
-  const handleNewParentImageChange = (file: File | null) => {
-    const next: ProfileImageState =
-      file !== null ? { status: "changed", file } : { status: "removed" }
-    setNewParentField("profileImage", next)
-  }
-
-  // ── Tab config — different tabs depending on hasParent ──
   const tabs = hasParent
     ? [
         { value: "keep", label: "✓ Keep" },
@@ -163,7 +96,16 @@ export const ParentSection = ({ currentParent, state, onChange }: Props) => {
         { value: "change", label: "👤 Link Existing" },
       ]
 
-  // ─────────────────────────────────────────────────────────
+   const {data=[],isLoading} = useQuery({
+    queryKey: ["all-parents"],
+    queryFn: getParents,
+   })   
+   useEffect(() => {
+    if (data) {
+      setParents(data)
+    }
+   }, [data])
+  if(isLoading) return <p>Loading...</p>
   return (
     <div>
       <SectionTitle icon="👨‍👩‍👧" label="Parent / Guardian" />
@@ -189,11 +131,13 @@ export const ParentSection = ({ currentParent, state, onChange }: Props) => {
 
       {/* No parent empty state */}
       {!hasParent && (
-        <div className="mb-3 rounded-xl border border-dashed bg-muted/30 py-4 text-center">
-          <p className="text-xs font-medium text-muted-foreground">
-            No parent linked to this student
-          </p>
+        <div className="bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-2xl p-4 mb-4 flex flex-col items-center justify-center text-center">
+        <div className="bg-indigo-100 p-3 rounded-full mb-3 text-indigo-900">
+          <User size={24} />
         </div>
+        <h3 className="text-slate-700 font-semibold">No parent linked to this student</h3>
+        <p className="text-slate-400 text-sm">Add one below or leave unlinked</p>
+      </div>
       )}
 
       {/* ── Tabs ── */}
@@ -201,12 +145,12 @@ export const ParentSection = ({ currentParent, state, onChange }: Props) => {
         value={state.mode}
         onValueChange={(v) => setMode(v as ParentEditMode)}
       >
-        <TabsList className="mb-4 w-full">
+        <TabsList className="mb-4 w-full py-6 px-1">
           {tabs.map((tab) => (
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className={`flex-1 text-xs ${tab.value === "remove" ? "data-[state=active]:text-red-500" : ""}`}
+              className={`flex-1 text-xs py-4 mx-1 ${tab.value === "remove" ? "data-[state=active]:text-red-500" : ""}`}
             >
               {tab.label}
             </TabsTrigger>
@@ -222,35 +166,25 @@ export const ParentSection = ({ currentParent, state, onChange }: Props) => {
 
         {/* ── EDIT INFO ── */}
         <TabsContent value="edit">
-          {state.editedParent && (
+           
             <div className="flex flex-col gap-3 rounded-xl border bg-muted/30 p-4">
               <p className="text-[11px] font-bold text-blue-600">
-                ✏️ Editing: {currentParent?.name}
+                ✏️ Editing: {parent.user.firstName} {parent.user.lastName}
               </p>
 
-              {/* Parent photo */}
-              <ImageUpload
-                name={state.editedParent.name}
-                currentImageUrl={
-                  state.editedParent.profileImage.status === "unchanged"
-                    ? state.editedParent.profileImage.url
-                    : null
-                }
-                label="Parent Photo"
-                onChange={handleEditedImageChange}
-              />
+              
 
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Full Name" required>
                   <Input
-                    value={state.editedParent.name}
-                    onChange={(e) => setEditedField("name", e.target.value)}
+                    value={`${parent.user.firstName} ${parent.user.lastName}`}
+                    
                   />
                 </Field>
                 <Field label="Relationship">
                   <Select
-                    value={state.editedParent.relationship}
-                    onValueChange={(v) => setEditedField("relationship", v)}
+                    value={parent.relationship}
+                  
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -267,175 +201,22 @@ export const ParentSection = ({ currentParent, state, onChange }: Props) => {
                 <Field label="Email" required>
                   <Input
                     type="email"
-                    value={state.editedParent.email}
-                    onChange={(e) => setEditedField("email", e.target.value)}
+                    value={parent.user.email}
+                    
                   />
                 </Field>
                 <Field label="Phone">
                   <Input
-                    value={state.editedParent.phone}
-                    onChange={(e) => setEditedField("phone", e.target.value)}
+                    value={parent.phone}
+                    
                   />
                 </Field>
               </div>
             </div>
-          )}
+         
         </TabsContent>
 
-        {/* ── CHANGE ── */}
-        <TabsContent value="change">
-          <div className="mb-2 flex items-center gap-2 rounded-lg border border-blue-400 bg-white px-3 py-2">
-            <span className="text-sm">🔍</span>
-            <input
-              className="flex-1 bg-transparent text-sm outline-none"
-              placeholder="Search parent by name or email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {searching && (
-              <span className="animate-pulse text-[10px] text-muted-foreground">
-                searching...
-              </span>
-            )}
-          </div>
-          <p className="mb-2 text-[10px] text-muted-foreground">
-            {hasParent
-              ? `Replace current parent: ${currentParent?.name}`
-              : "Find an existing parent to link"}
-          </p>
-
-          {/* Results */}
-          <div className="flex max-h-48 flex-col gap-1.5 overflow-y-auto">
-            {searchResults.length === 0 && !searching && (
-              <p className="py-4 text-center text-xs text-muted-foreground">
-                {searchQuery ? "No parents found" : "Type to search..."}
-              </p>
-            )}
-            {searchResults.map((p) => {
-              const isSelected = state.newExistingParentId === p.id
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() =>
-                    onChange({
-                      ...state,
-                      newExistingParentId: p.id,
-                      newExistingParent: p,
-                    })
-                  }
-                  className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-all ${
-                    isSelected
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-border bg-white hover:border-blue-200"
-                  }`}
-                >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500 text-xs font-bold text-white">
-                    {p.name.charAt(0)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold">{p.name}</p>
-                    <p className="truncate text-[10px] text-muted-foreground">
-                      {p.email}
-                    </p>
-                    {p.linkedChildren.length > 0 && (
-                      <p className="text-[10px] text-muted-foreground">
-                        Linked to:{" "}
-                        <span className="font-semibold text-blue-600">
-                          {p.linkedChildren.join(", ")}
-                        </span>
-                      </p>
-                    )}
-                  </div>
-                  <div
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
-                      isSelected
-                        ? "bg-blue-600 text-white"
-                        : "border-2 border-border"
-                    }`}
-                  >
-                    {isSelected && "✓"}
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-
-          {state.newExistingParent && (
-            <div className="mt-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-[11px] text-blue-700">
-              ✅ Will link: <strong>{state.newExistingParent.name}</strong>
-            </div>
-          )}
-        </TabsContent>
-
-        {/* ── ADD NEW ── */}
-        <TabsContent value="addNew">
-          {state.newParent && (
-            <div className="flex flex-col gap-3 rounded-xl border border-blue-200 bg-blue-50/40 p-4">
-              <p className="text-[11px] font-bold text-blue-600">
-                ➕ New Parent Account
-              </p>
-
-              <ImageUpload
-                name={state.newParent.name}
-                label="Parent Photo"
-                onChange={handleNewParentImageChange}
-              />
-
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Full Name" required>
-                  <Input
-                    placeholder="e.g. Chan Sopheak"
-                    value={state.newParent.name}
-                    onChange={(e) => setNewParentField("name", e.target.value)}
-                  />
-                </Field>
-                <Field label="Relationship">
-                  <Select
-                    value={state.newParent.relationship}
-                    onValueChange={(v) => setNewParentField("relationship", v)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="Father">Father</SelectItem>
-                        <SelectItem value="Mother">Mother</SelectItem>
-                        <SelectItem value="Guardian">Guardian</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </Field>
-                <Field label="Email" required>
-                  <Input
-                    type="email"
-                    placeholder="parent@gmail.com"
-                    value={state.newParent.email}
-                    onChange={(e) => setNewParentField("email", e.target.value)}
-                  />
-                </Field>
-                <Field label="Password" required>
-                  <Input
-                    type="password"
-                    placeholder="Min 6 characters"
-                    value={state.newParent.password}
-                    onChange={(e) =>
-                      setNewParentField("password", e.target.value)
-                    }
-                  />
-                </Field>
-                <Field label="Phone" hint="Optional">
-                  <Input
-                    placeholder="012 345 678"
-                    value={state.newParent.phone}
-                    onChange={(e) => setNewParentField("phone", e.target.value)}
-                  />
-                </Field>
-              </div>
-            </div>
-          )}
-        </TabsContent>
+        
 
         {/* ── REMOVE ── */}
         <TabsContent value="remove">
@@ -460,6 +241,114 @@ export const ParentSection = ({ currentParent, state, onChange }: Props) => {
               <p>✅ You can re-link a parent any time from this form</p>
             </div>
           </div>
+        </TabsContent>
+        {/* ── CHANGE ── */}
+        <TabsContent value="change" className="mt-6 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500" size={18} />
+            <Input 
+              className="pl-10 h-12 border-2 border-blue-500 focus-visible:ring-0 rounded-xl font-medium" 
+              defaultValue="keo" 
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-bold uppercase">2 results</span>
+          </div>
+          <p className="text-[11px] text-slate-400">Find an existing parent account to link</p>
+
+          <div className="space-y-3 overflow-y-auto h-[200px] [&::-webkit-scrollbar-track]:bg-slate-100
+                          [&::-webkit-scrollbar-thumb]:bg-slate-300
+                          [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar]:w-2">
+            
+            {parents.map((parent) => (
+              <ParentCard 
+                key={parent.id} 
+                firstName={parent.user.firstName} 
+                lastName={parent.user.lastName}
+                link={parent.students.map((student:any) => student.user.firstName + " " + student.user.lastName)}
+                email={parent.user.email} 
+                phone={parent.phone} 
+                meta="Linked to"
+                color="bg-indigo-500"
+                selected={selectedParent === parent.id}
+                onClick={() => setSelectedParent(parent.id)}
+
+              />
+             
+            ))}
+
+           
+          </div>
+
+          {selectedParent && (
+            <div className="flex items-center gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 animate-in fade-in zoom-in duration-200">
+              <CheckCircle2 size={16} className="text-emerald-500" />
+              <p className="text-xs font-medium">
+                Will link <span className="font-bold">{selectedParent}</span> as parent for {studentName}
+              </p>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* ── ADD NEW ── */}
+        <TabsContent value="addNew">
+          {state.newParent && (
+            <div className="flex flex-col gap-3 rounded-xl border border-blue-200 bg-blue-50/40 p-4">
+              <p className="text-[11px] font-bold text-blue-600">
+                ➕ New Parent Account
+              </p>
+
+              {/* <ImageUpload
+                name={state.newParent.name}
+                label="Parent Photo"
+                onChange={handleNewParentImageChange}
+              /> */}
+
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Full Name" required>
+                  <Input
+                    placeholder="e.g. Chan Sopheak"
+                    
+                    
+                  />
+                </Field>
+                <Field label="Relationship">
+                  <Select
+                    
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="Father">Father</SelectItem>
+                        <SelectItem value="Mother">Mother</SelectItem>
+                        <SelectItem value="Guardian">Guardian</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field label="Email" required>
+                  <Input
+                    type="email"
+                    placeholder="parent@gmail.com"
+                   
+                  />
+                </Field>
+                <Field label="Password" required>
+                  <Input
+                    type="password"
+                    placeholder="Min 6 characters"
+                    
+                  />
+                </Field>
+                <Field label="Phone" hint="Optional">
+                  <Input
+                    placeholder="012 345 678"
+                    
+                  />
+                </Field>
+              </div>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

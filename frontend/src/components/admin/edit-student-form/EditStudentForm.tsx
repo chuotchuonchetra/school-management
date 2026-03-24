@@ -79,10 +79,10 @@ export const EditStudentForm = ({ isEdit, student, onClose }: Props) => {
     <Dialog open={isEdit} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         size="xl"
-        className="max-h-[90vh] max-w-xl overflow-y-auto p-0"
+        className="max-h-[90vh] max-w-xl  p-0"
       >
         {/* Header */}
-        <DialogHeader className="border-b px-6 pt-6 pb-4">
+        <DialogHeader className="border-b px-4 py-2">
           <DialogTitle className="text-base font-extrabold">
             ✏️ Edit Student
           </DialogTitle>
@@ -91,7 +91,7 @@ export const EditStudentForm = ({ isEdit, student, onClose }: Props) => {
           </p>
         </DialogHeader>
 
-        <div className="flex flex-col gap-6 px-6 py-5">
+        <div className="flex  flex-col gap-6 px-6 pb-4 overflow-y-auto h-[75vh]  [scrollbar-width:thin] [scrollbar-color:gray]  ">
           {/* 1. Student Photo */}
           <div className="flex flex-col gap-3">
             <SectionLabel icon="📷" label="Student Photo" />
@@ -205,21 +205,23 @@ export const EditStudentForm = ({ isEdit, student, onClose }: Props) => {
           </div>
 
           <ParentSection
+            parent={student.parent}
             currentParent={{
-              userId: 101,
-              name: "Sovan Mony",
-              email: "mony.sovan@email.com",
-              phone: "012-345-678",
-              profileImage:
-                "https://api.dicebear.com/7.x/avataaars/svg?seed=Mony",
+              id: 1,
+              name: "Keo Bunna",
+              email: "[EMAIL_ADDRESS]",
+              phone: "012 345 678",
               relationship: "Father",
+              profileImage: null,
+              linkedChildren: ["Piseth Keo"],
             }} // from GET /api/students/:id
             state={form.parentEdit}
             onChange={(ps) => set("parentEdit", ps)}
           />
 
+        </div>
           {/* Footer */}
-          <div className="flex items-center justify-between border-t border-gray-100 pt-2">
+          <div className=" px-6 py-3 flex items-center justify-between border-t border-gray-100 pt-2">
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
@@ -227,7 +229,6 @@ export const EditStudentForm = ({ isEdit, student, onClose }: Props) => {
               ✓ Save Changes
             </Button>
           </div>
-        </div>
       </DialogContent>
     </Dialog>
   )
