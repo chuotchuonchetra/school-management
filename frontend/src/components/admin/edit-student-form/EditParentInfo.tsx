@@ -11,76 +11,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useState, useEffect } from "react"
-// import { ImageUpload } from "@/components/shared/ImageUpload"
+import { useState, } from "react"
+
 import type {
-  // CurrentParent,
   ParentEditMode,
   ParentEditState,
-  // ParentOption,
-  // ProfileImageState,
 } from "@/types/editstudent.type"
-import { useQuery } from "@tanstack/react-query"
-import { getParents } from "@/api/parent.api"
+
 import { CheckCircle2, Search, User } from "lucide-react"
 import { ParentCard } from "@/components/shared/ParentCard"
+import { ImageUpload } from "@/components/shared/ImageUpload"
+import { useDebounce } from "@/hooks/useDebouce"
+import { useParent } from "@/hooks/useParent"
 
-// ─────────────────────────────────────────────────────────────
-//  PROPS
-// ─────────────────────────────────────────────────────────────
 interface Props {
-  parent:any
-  currentParent: any | null // null = student has no parent
+  parentLinked:any
   state: ParentEditState
   onChange: (next: ParentEditState) => void
+  studentName:string
 }
 
-// ─────────────────────────────────────────────────────────────
-//  MOCK search — replace with real API call
-// ─────────────────────────────────────────────────────────────
-// const searchParents = async (q: string): Promise<ParentOption[]> => {
-//   const MOCK: ParentOption[] = [
-//     {
-//       id: 10,
-//       name: "Chan Sopheak",
-//       email: "sopheak@gmail.com",
-//       phone: "012 987 654",
-//       profileImage: null,
-//       linkedChildren: ["Dara Chan"],
-//     },
-//     {
-//       id: 11,
-//       name: "Channa Pov",
-//       email: "channa@gmail.com",
-//       phone: "077 123 456",
-//       profileImage: null,
-//       linkedChildren: ["Kokoma sok", "Jame Sok"],
-//     },
-//     {
-//       id: 12,
-//       name: "Channary Kim",
-//       email: "channary@gmail.com",
-//       phone: "089 654 321",
-//       profileImage: null,
-//       linkedChildren: ["Kim Sokha"],
-//     },
-//   ]
-//   return MOCK.filter(
-//     (p) =>
-//       p.name.toLowerCase().includes(q.toLowerCase()) ||
-//       p.email.toLowerCase().includes(q.toLowerCase())
-//   )
-// }
 
-// ─────────────────────────────────────────────────────────────
-//  COMPONENT
-// ─────────────────────────────────────────────────────────────
-export const ParentSection = ({ currentParent, state, onChange ,parent}: Props) => {
-  console.log(parent)
-  const [parents,setParents] = useState<any[]>([])
-  const [selectedParent, setSelectedParent] = useState<string | null>("Keo Bunna");
-  const studentName = "Piseth Keo";
-  const hasParent = currentParent !== null
+
+export const ParentSection = ({ state, onChange ,parentLinked,studentName}: Props) => {
+  const [text,setText] = useState<string>("")
+  const debouncedSearch = useDebounce(text,500) 
+
+  const { data , isLoading } = useParent(debouncedSearch)
+ 
+
+
+  const [selectedParent, setSelectedParent] = useState<any | null>(null);
+  const hasParent = parent !== null
   
   const setMode = (mode: ParentEditMode) => onChange({ ...state, mode })
 
@@ -96,37 +58,31 @@ export const ParentSection = ({ currentParent, state, onChange ,parent}: Props) 
         { value: "change", label: "👤 Link Existing" },
       ]
 
-   const {data=[],isLoading} = useQuery({
-    queryKey: ["all-parents"],
-    queryFn: getParents,
-   })   
-   useEffect(() => {
-    if (data) {
-      setParents(data)
-    }
-   }, [data])
+     
+  
   if(isLoading) return <p>Loading...</p>
   return (
     <div>
       <SectionTitle icon="👨‍👩‍👧" label="Parent / Guardian" />
 
       {/* Current parent card — shown when student has a parent */}
-      {hasParent && state.mode !== "remove" && (
+      {hasParent && state.mode == "keep" && (
         <div className="mb-3 flex items-center gap-3 rounded-xl border bg-muted/40 px-3 py-2.5">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-500 text-sm font-bold text-white">
-            {currentParent!.name.charAt(0)}
+            {parentLinked.user.firstName.charAt(0)}
           </div>
           <div className="flex-1">
-            <p className="text-xs font-bold">{currentParent!.name}</p>
+            <p className="text-xs font-bold">{parentLinked.user.firstName + " " + parentLinked.user.lastName}</p>
             <p className="text-[10px] text-muted-foreground">
-              {currentParent!.email} · {currentParent!.relationship} ·{" "}
-              {currentParent!.phone}
+              {parentLinked.user.email} · {parentLinked.relationship} ·{" "}
+              {parentLinked.phone}
             </p>
           </div>
           <span className="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[10px] font-bold text-green-600">
             Linked
           </span>
         </div>
+        
       )}
 
       {/* No parent empty state */}
@@ -169,21 +125,25 @@ export const ParentSection = ({ currentParent, state, onChange ,parent}: Props) 
            
             <div className="flex flex-col gap-3 rounded-xl border bg-muted/30 p-4">
               <p className="text-[11px] font-bold text-blue-600">
-                ✏️ Editing: {parent.user.firstName} {parent.user.lastName}
+                ✏️ Editing: {parentLinked.user.firstName} {parentLinked.user.lastName}
               </p>
 
               
-
+              <ImageUpload onChange={() => {}}
+                label="Profile Image"
+                name={parentLinked.user.firstName + " " + parentLinked.user.lastName}
+                currentImageUrl={parentLinked.user.profileImage?.image}
+                />
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Full Name" required>
                   <Input
-                    value={`${parent.user.firstName} ${parent.user.lastName}`}
+                    value={`${parentLinked.user.firstName} ${parentLinked.user.lastName}`}
                     
                   />
                 </Field>
                 <Field label="Relationship">
                   <Select
-                    value={parent.relationship}
+                    value={parentLinked.relationship}
                   
                   >
                     <SelectTrigger>
@@ -201,13 +161,13 @@ export const ParentSection = ({ currentParent, state, onChange ,parent}: Props) 
                 <Field label="Email" required>
                   <Input
                     type="email"
-                    value={parent.user.email}
+                    value={parentLinked.user.email}
                     
                   />
                 </Field>
                 <Field label="Phone">
                   <Input
-                    value={parent.phone}
+                    value={parentLinked.phone}
                     
                   />
                 </Field>
@@ -226,7 +186,7 @@ export const ParentSection = ({ currentParent, state, onChange ,parent}: Props) 
               Remove Parent Link
             </p>
             <p className="mb-3 text-[11px] leading-relaxed text-red-500">
-              This will unlink <strong>{currentParent?.name}</strong> from this
+              This will unlink <strong>{parentLinked.user.firstName + " " + parentLinked.user.lastName}</strong> from this
               student.
               <br />
               The parent account will <strong>NOT be deleted</strong> — only the
@@ -248,9 +208,12 @@ export const ParentSection = ({ currentParent, state, onChange ,parent}: Props) 
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500" size={18} />
             <Input 
               className="pl-10 h-12 border-2 border-blue-500 focus-visible:ring-0 rounded-xl font-medium" 
-              defaultValue="keo" 
+              value={text} 
+              onChange={(e) => setText(e.target.value)}
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-bold uppercase">2 results</span>
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-bold uppercase">
+              {text ? data?.filter((parent:any) => parent.user.firstName.toLowerCase().includes(text.toLowerCase()) || parent.user.lastName.toLowerCase().includes(text.toLowerCase())).length : '0'} results
+            </span>
           </div>
           <p className="text-[11px] text-slate-400">Find an existing parent account to link</p>
 
@@ -258,34 +221,80 @@ export const ParentSection = ({ currentParent, state, onChange ,parent}: Props) 
                           [&::-webkit-scrollbar-thumb]:bg-slate-300
                           [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar]:w-2">
             
-            {parents.map((parent) => (
-              <ParentCard 
-                key={parent.id} 
-                firstName={parent.user.firstName} 
-                lastName={parent.user.lastName}
-                link={parent.students.map((student:any) => student.user.firstName + " " + student.user.lastName)}
-                email={parent.user.email} 
-                phone={parent.phone} 
-                meta="Linked to"
-                color="bg-indigo-500"
-                selected={selectedParent === parent.id}
-                onClick={() => setSelectedParent(parent.id)}
+            {/* 1. Show results if we have data and user has typed something */}
+            {debouncedSearch ? (
+  isLoading ? (
+    <div className="flex items-center justify-center h-full text-sm text-slate-400">
+      Searching...
+    </div>
+  ) : data.length > 0 ? (
+    <>
+      {/* ✅ Parent list */}
+      {data.map((parent: any) => (
+        <ParentCard
+          key={parent.id}
+          parentId={parent.user.id}
+          relationship={parent.relationship}
+          firstName={parent.user.firstName}
+          lastName={parent.user.lastName}
+          linkChildren={["test"]}
+          email={parent.user.email}
+          phone={parent.phone}
+          color="bg-indigo-500"
+          isLinkedId={parentLinked.user.id}
+          selectedId={selectedParent?.user.id}
+          onClick={() => setSelectedParent(parent)}
+        />
+      ))}
 
-              />
-             
-            ))}
-
+      {/* ✅ Selected message */}
+      {selectedParent !== null && (
+        <div className="flex items-center gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 animate-in fade-in zoom-in duration-200">
+          <CheckCircle2 size={16} className="text-emerald-500" />
+          <p className="text-xs font-medium">
+            Will link parent ID{" "}
+            <span className="font-bold">{selectedParent.user.firstName + " " + selectedParent.user.lastName}</span> to{" "}
+            {studentName}
+          </p>
+        </div>
+      )}
+    </>
+    
+  ) : (
+    // ❌ No results
+    <div className="flex flex-col items-center justify-center h-full text-center border border-dashed border-slate-300 rounded-xl bg-slate-50">
+      <div className="bg-slate-100 p-3 rounded-full mb-2 text-slate-400">
+        <Search size={20} />
+      </div>
+      <p className="text-sm font-medium text-slate-500">
+        No parents found
+      </p>
+      <p className="text-xs text-slate-400">
+        No results match "{debouncedSearch}"
+      </p>
+    </div>
+      )
+    ) : (
+      // 💤 No search yet
+      <div className="flex flex-col items-center justify-center h-full text-center border border-dashed border-slate-300 rounded-xl bg-slate-50">
+        <div className="bg-slate-100 p-3 rounded-full mb-2 text-slate-400">
+          <Search size={20} />
+        </div>
+        <p className="text-sm font-medium text-slate-500">
+          No parent selected
+        </p>
+        <p className="text-xs text-slate-400">
+          Search parent to link student
+        </p>
+        <div className="mt-2 text-[11px] text-slate-300 italic">
+          Start typing in the search box above...
+        </div>
+      </div>
+    )}
            
-          </div>
+       </div>
 
-          {selectedParent && (
-            <div className="flex items-center gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 animate-in fade-in zoom-in duration-200">
-              <CheckCircle2 size={16} className="text-emerald-500" />
-              <p className="text-xs font-medium">
-                Will link <span className="font-bold">{selectedParent}</span> as parent for {studentName}
-              </p>
-            </div>
-          )}
+          
         </TabsContent>
 
         {/* ── ADD NEW ── */}

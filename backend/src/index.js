@@ -5,7 +5,8 @@ const morgan = require("morgan");
 
 const db = require("./models"); // change if your db path is different
 const userRoutes = require("./routes/userRoutes"); // CommonJS route
-const fileUpload = require("express-fileupload");
+
+
 
 // ── Load env variables ────────────────────────────────────────
 dotenv.config({ path: "./src/.env" });
@@ -20,24 +21,25 @@ app.use(
     credentials: true,
   }),
 );
-const fileUpLoad = require('express-fileupload')
-app.use(fileUpLoad({
-    useTempFiles: true,
-    tempFileDir: '/tmp/',
-    limits:{
-        fileSize: 1024 * 1024 * 10,
-    },
-    createParentPath:true
-}))
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev")); // logs every request in terminal
 
+
+
+app.use('/uploads',express.static('uploads',{
+  maxAge:'1d',
+  index:false,
+  dotfiles:'ignore',
+  etag:true
+}));
+app.use('/api',require('../src/routes/uploadRoute'));
 // ── Routes ────────────────────────────────────────────────────
 app.use("/api", userRoutes);
 app.use("/api", require("../src/routes/studentRoutes"));
 app.use("/api", require("../src/routes/parentRoute"));
-app.use("/api",require("../src/controllers/Upload.controller"));
+
 // app.use("/api", studentRoutes)
 // app.use("/api", teacherRoutes)
 // app.use("/api", classRoutes)

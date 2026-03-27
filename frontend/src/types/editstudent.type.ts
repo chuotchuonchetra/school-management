@@ -2,6 +2,8 @@
 //  editStudent.types.ts
 // ─────────────────────────────────────────────────────────────
 
+import type { Parent } from "./parent.type";
+
 // ── Profile image — 3 states for edit ────────────────────────
 export type ProfileImageState =
   | { status: "unchanged"; url: string | null } // don't touch
@@ -32,15 +34,15 @@ export interface CurrentParent {
 export interface ParentEditState {
   mode: ParentEditMode
 
-  // mode === 'edit' — fields for editing current parent
-  editedParent?: any
+ 
+  editedParent?: Parent
 
   // mode === 'change' — pick an existing parent
   newExistingParentId?: number
-  newExistingParent?: any
+  newExistingParent?: Parent
 
   // mode === 'addNew' — create a brand new parent
-  newParent?: any
+  newParent?: Parent
 }
 
 // ── Full edit form state ──────────────────────────────────────

@@ -3,7 +3,6 @@ import apiClient from "@/lib/apiClient"
 
 export const getStudents = async () => {
   const res = await apiClient.get("/students")
-  console.log(res.data.data)
   return res.data.data
 }
 export const getStudentById = async (id: number) => {

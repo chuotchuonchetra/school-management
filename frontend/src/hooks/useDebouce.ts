@@ -7,7 +7,7 @@ export function useDebounce<T>(value: T, delay: number) {
     const timer = setTimeout(() => {
       setDebouncedValue(value)
     }, delay)
-
+    console.log(debouncedValue)
     return () => {
       clearTimeout(timer)
     }

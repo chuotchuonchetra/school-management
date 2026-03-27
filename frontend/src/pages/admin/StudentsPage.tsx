@@ -115,12 +115,7 @@ export const StudentsPage = () => {
     },
   })
 
-  // ── 7. Edit click — fetch full student first ──────────────
-  // We can't use the StudentListItem from the table because it's
-  // missing full parent data (phone, relationship, profileImage etc.)
-  // So we call GET /api/students/:id to get the complete object
   const handleEditClick = async (student: StudentListItem) => {
-    console.log(student.id, student.name)
     
     setLoadingId(student.id) // show spinner on that row
     try {

@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 
 const db = require("../models");
-const { User, Student } = db;
+const { User, Student ,ProfileImage} = db;
 
 const login = async (req, res) => {
   try {
@@ -41,7 +41,7 @@ const login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        profileImage: user.profileImage,
+      
       },
     });
   } catch (error) {
@@ -54,7 +54,7 @@ const login = async (req, res) => {
 // ─────────────────────────────────────────────────────────────
 const register = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, role, profileImage } =
+    const { firstName, lastName, email, password, role } =
       req.body;
 
     // Validate required fields
@@ -93,7 +93,6 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      profileImage: req.file?.path || profileImage || null,
     });
 
     res.status(201).json({
@@ -103,7 +102,6 @@ const register = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        profileImage: user.profileImage,
       },
     });
   } catch (error) {
@@ -134,7 +132,7 @@ const getMe = async (req, res) => {
 // ─────────────────────────────────────────────────────────────
 const getUsers = async (req, res) => {
   try {
-    const { role, search, page = 1, limit = 20 } = req.query;
+    const { role, search, page , limit  } = req.query;
 
     const where = {};
 
@@ -142,7 +140,8 @@ const getUsers = async (req, res) => {
 
     if (search) {
       where[Op.or] = [
-        { name: { [Op.iLike]: `%${search}%` } },
+        { firstName: { [Op.iLike]: `%${search}%` } },
+        { lastName: { [Op.iLike]: `%${search}%` } },
         { email: { [Op.iLike]: `%${search}%` } },
       ];
     }
@@ -153,6 +152,13 @@ const getUsers = async (req, res) => {
       limit: Number(limit),
       offset: (Number(page) - 1) * Number(limit),
       order: [["createdAt", "DESC"]],
+      include:[
+        {
+          model:ProfileImage,
+          as:"profileImage",
+          attributes:['image','userId','id']
+        }
+      ]
     });
 
     res.json({
@@ -212,13 +218,7 @@ const updateUser = async (req, res) => {
     if (phone) updateData.phone = phone;
     if (relationship) updateData.relationship = relationship;
 
-    if (req.file) {
-      updateData.profileImage = req.file.path;
-    }
-
-    if (req.body.profileImage === "") {
-      updateData.profileImage = null;
-    }
+    
 
     if (newPassword) {
       if (newPassword.length < 6) {
@@ -306,7 +306,6 @@ const searchParents = async (req, res) => {
       name: p.name,
       email: p.email,
       phone: p.phone,
-      profileImage: p.profileImage,
       linkedChildren: p.children.map((c) => c.user?.name ?? ""),
     }));
 

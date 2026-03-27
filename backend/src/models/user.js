@@ -24,7 +24,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "userId",
         as: "parentProfile",
       });
-
+      User.hasOne(models.ProfileImage, {
+        foreignKey: "userId",
+        as: "profileImage",
+      });
       // parent user has many students (children)
       User.hasMany(models.Student, { foreignKey: "parentId", as: "children" });
     }
@@ -36,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
       email: DataTypes.STRING,
       password: DataTypes.STRING,
       role: DataTypes.ENUM("admin", "teacher", "student", "parent"),
-      profileImage: DataTypes.STRING,
+     
     },
     {
       sequelize,

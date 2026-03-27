@@ -2,34 +2,12 @@
 //  types/student.types.ts
 // ─────────────────────────────────────────────────────────────
 
-// ── Full student from GET /api/students/:id ───────────────────
-export interface Student {
-  id: number
-  studentNumber: string
-  classId: number
-  parentId: number | null
-  academicYear: string
-  createdAt: string
-  user: {
-    id: number
-    name: string
-    email: string
-    profileImage: string | null
-  }
-  class: {
-    id: number
-    name: string
-    gradeLevel: number
-  }
-  parent: {
-    id: number
-    name: string
-    email: string
-    phone: string
-    profileImage: string | null
-    relationship: string
-  } | null
-}
+import type { User } from "./auth.types"
+import type { ParentEditMode } from "./editstudent.type"
+import type { ParentPayLoad } from "./parent.type"
+
+
+
 
 // ── Flat row for the students list table ─────────────────────
 export interface StudentListItem {
@@ -41,8 +19,7 @@ export interface StudentListItem {
   className: string // from class.name
   parentName: string | null // from parent user.name
   status: string
-  // attendanceRate: number | null // null = no records yet
-  // isAtRisk: boolean // true if attendanceRate < 75
+  
 }
 
 // ── Add student form step 1 ───────────────────────────────────
@@ -113,41 +90,49 @@ export interface CreateStudentRequest {
   classId: number
   academicYear: string
   profileImage?: File | null
-  parentId?: number // mode === "existing"
-  newParent?: {
-    // mode === "new"
-    firstName: string
-    lastName: string
-    email: string
-    password: string
-    phone: string
-    relationship: string
-    profileImage?: File | null
-  }
+  parentId?: number 
+  newParent?: ParentPayLoad
 }
 
+export interface StudentPayload {
+  id: number,
+  userId:number,
+  studentNumber: string,
+  classId: number,
+  parentId: number,
+  academicYear: string,
+  user: User,
+  parent:ParentPayLoad
+  createdAt: string,
+  updatedAt: string,
+}
 // ── PATCH /api/students/:id ───────────────────────────────────
+// types/student.types.ts
+export interface UpdateUserRequest {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  profileImage:profileImage
+}
 export interface UpdateStudentRequest {
-  name?: string
-  email?: string
-  classId?: number
-  newPassword?: string
-  profileImage?: File | null
-  parentMode?: "keep" | "edit" | "change" | "addNew" | "remove"
-  linkParentId?: number
-  editParent?: {
-    name?: string
-    email?: string
-    phone?: string
-    relationship?: string
-    profileImage?: File | null
-  }
-  newParent?: {
-    name: string
-    email: string
-    password: string
-    phone: string
-    relationship: string
-    profileImage?: File | null
-  }
+  studentNumber?: string;
+  classId?: number;
+  parentId?: number;
+  academicYear?: string;
+  user?: UpdateUserRequest
+  parent?: {
+    phone?: string;
+    relationship?: string;
+    user?: UpdateUserRequest
+  };
+  newPassword?: string;
+  confirmPassword?: string;
+  updateParentMode?: ParentEditMode
+}
+
+
+export interface profileImage {
+  id: number;
+  image: string;
+  userId: number;
 }

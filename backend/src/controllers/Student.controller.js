@@ -2,16 +2,7 @@ const bcrypt = require("bcrypt");
 const { Op } = require("sequelize");
 const db = require("../models");
 
-const { User, Student, Parent, Class } = db;
-
-// ─────────────────────────────────────────────────────────────
-//  GET /api/students
-//  Query params:
-//    ?classId=1          filter by class
-//    ?search=sophea      search by name or email
-//    ?academicYear=2025  filter by year
-//    ?page=1&limit=20    pagination
-// ─────────────────────────────────────────────────────────────
+const { User, Student, Parent, Class, ProfileImage } = db;
 
 const getAllStudent = async (req, res) => {
   try {
@@ -69,7 +60,14 @@ const getStudents = async (req, res) => {
           model: User,
           as: "user",
           where: userWhere, // ← search filter applied here
-          attributes: ["id", "name", "email", "profileImage"],
+          attributes: ["id", "name", "email"],
+          include:[
+            {
+              model:ProfileImage,
+              as:"profileImage",
+              attributes:['image','userId','id']
+            }
+          ]
         },
         {
           model: Class,
@@ -84,7 +82,14 @@ const getStudents = async (req, res) => {
             {
               model: User,
               as: "user",
-              attributes: ["id", "name", "email", "profileImage"],
+              attributes: ["id", "name", "email"],
+                include:[
+                {
+                  model:ProfileImage,
+                  as:"profileImage",
+                  attributes:['image','userId','id']
+                }
+              ]
             },
           ],
         },
@@ -98,7 +103,7 @@ const getStudents = async (req, res) => {
       academicYear: s.academicYear,
       name: s.user.name,
       email: s.user.email,
-      profileImage: s.user.profileImage,
+      profileImage: s.user.profileImage.image,
       className: s.class?.name ?? "—",
       parentName: s.parent?.user?.name ?? null,
       attendanceRate: null, // computed separately if needed
@@ -148,8 +153,15 @@ const getStudentById = async (req, res) => {
                 "firstName",
                 "lastName",
                 "email",
-                "profileImage",
+                
               ],
+              include:[
+                {
+                  model:ProfileImage,
+                  as:"profileImage",
+                  attributes:['image','userId','id']
+                }
+              ]
             },
           ],
         },
@@ -288,7 +300,7 @@ const createStudent = async (req, res) => {
         email,
         password: await bcrypt.hash(password, 10),
         role: "student",
-        profileImage: req.files?.profileImage?.[0]?.path || null,
+        
       },
       { transaction },
     );
@@ -350,9 +362,6 @@ const updateStudent = async (req, res) => {
     if (firstName) userUpdate.firstName = firstName;
     if (firstName) userUpdate.lastName = lastName;
     if (email) userUpdate.email = email;
-    if (req.files?.profileImage?.[0])
-      userUpdate.profileImage = req.files.profileImage[0].path;
-    if (req.body.profileImage === "") userUpdate.profileImage = null;
     if (newPassword) userUpdate.password = await bcrypt.hash(newPassword, 10);
 
     if (Object.keys(userUpdate).length > 0) {
@@ -418,7 +427,7 @@ const updateStudent = async (req, res) => {
           email: pEmail,
           password: await bcrypt.hash(pPassword, 10),
           role: "parent",
-          profileImage: req.files?.parentProfileImage?.[0]?.path || null,
+          
         },
         { transaction },
       );
