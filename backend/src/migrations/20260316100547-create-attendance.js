@@ -5,15 +5,15 @@ module.exports = {
     await queryInterface.createTable("Attendances", {
       id: {
         allowNull: false,
-        autoIncrement: true,
+        defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
       },
       studentId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
       },
       subjectId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
       },
       date: {
         type: Sequelize.DATEONLY,
@@ -23,6 +23,12 @@ module.exports = {
         defaultValue: "present",
         allowNull: false,
       },
+      classId: {
+        type: Sequelize.UUID,
+      },
+      recordedBy: {
+        type: Sequelize.UUID,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
@@ -31,6 +37,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
+
     });
   },
   async down(queryInterface, Sequelize) {

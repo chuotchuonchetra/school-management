@@ -5,15 +5,15 @@ module.exports = {
     await queryInterface.createTable("Grades", {
       id: {
         allowNull: false,
-        autoIncrement: true,
+        defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
       },
       studentId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
       },
       subjectId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
       },
       score: {
         type: Sequelize.DECIMAL,

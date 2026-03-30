@@ -5,18 +5,22 @@ module.exports = {
     await queryInterface.createTable("Parents", {
       id: {
         allowNull: false,
-        autoIncrement: true,
+        defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
       },
       userId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
+        allowNull: false,
       },
       phone: {
         type: Sequelize.STRING,
       },
       relationship: {
         type: Sequelize.ENUM("Father", "Mother", "Guardian"),
+      },
+      isActive: {
+        type: Sequelize.BOOLEAN,
       },
       createdAt: {
         allowNull: false,

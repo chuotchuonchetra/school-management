@@ -27,11 +27,20 @@ module.exports = (sequelize, DataTypes) => {
   }
   Student.init(
     {
-      userId: DataTypes.INTEGER,
-      classId: DataTypes.INTEGER,
-      parentId: DataTypes.INTEGER,
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        allowNull: false,
+      },
+      userId: DataTypes.UUID,
+      classId: DataTypes.UUID,
+      parentId: DataTypes.UUID,
       studentNumber: DataTypes.STRING,
-      academicYear: DataTypes.STRING,
+      academicYear: DataTypes.INTEGER,
+      gender: DataTypes.ENUM("Male", "Female"),
+      dateOfBirth: DataTypes.DATEONLY,    
+      isActive: DataTypes.BOOLEAN,
     },
     {
       sequelize,

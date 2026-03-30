@@ -11,11 +11,44 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Teacher.belongsTo(models.User, {
+        foreignKey: 'userId',
+        as: 'user'
+      });
+      Teacher.hasMany(models.Subject, {
+        foreignKey: 'teacherId',
+        as: 'subjects'
+      });
+      Teacher.hasMany(models.Timetable, {
+        foreignKey: 'teacherId',
+        as: 'timetables'
+      });
+      Teacher.hasMany(models.Attendance, {
+        foreignKey: 'recordedBy',
+        as: 'recordedAttendances'
+      });
+      Teacher.hasMany(models.Grade, {
+        foreignKey: 'gradedBy',
+        as: 'gradedGrades'
+      });
+      Teacher.hasMany(models.Class, {
+        foreignKey: 'teacherId',
+        as: 'classes'
+      });
     }
   }
   Teacher.init({
-    userId: DataTypes.INTEGER,
-    teacherNumber: DataTypes.STRING
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+      allowNull: false,
+    },
+    userId: DataTypes.UUID,
+    teacherNumber: DataTypes.STRING,
+    isActive: DataTypes.BOOLEAN,
+    gender: DataTypes.ENUM("Male", "Female"),
+    dateOfBirth: DataTypes.DATE,
   }, {
     sequelize,
     modelName: 'Teacher',

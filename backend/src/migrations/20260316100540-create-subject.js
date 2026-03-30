@@ -5,18 +5,25 @@ module.exports = {
     await queryInterface.createTable('Subjects', {
       id: {
         allowNull: false,
-        autoIncrement: true,
+        defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.UUID
       },
-      name: {
+      subjectName: {
         type: Sequelize.STRING
       },
-      classId: {
-        type: Sequelize.INTEGER
-      },
       teacherId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.UUID
+      },
+      classId: {
+        type: Sequelize.UUID
+      },
+      subjectCode: {
+        type: Sequelize.STRING
+      },
+      isActive: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true,
       },
       createdAt: {
         allowNull: false,

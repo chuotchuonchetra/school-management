@@ -39,6 +39,7 @@ app.use('/api',require('../src/routes/uploadRoute'));
 app.use("/api", userRoutes);
 app.use("/api", require("../src/routes/studentRoutes"));
 app.use("/api", require("../src/routes/parentRoute"));
+app.use("/api", require("../src/routes/classRoute"));
 
 // app.use("/api", studentRoutes)
 // app.use("/api", teacherRoutes)

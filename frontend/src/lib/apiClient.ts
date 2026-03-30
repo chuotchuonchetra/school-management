@@ -20,6 +20,9 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // redirect to login
+      localStorage.removeItem("token")
+      localStorage.removeItem("role")
+      window.location.href = "/login"
     }
     return Promise.reject(error)
   }

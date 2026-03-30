@@ -16,8 +16,15 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   ProfileImage.init({
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+      allowNull: false,
+    },
     image: DataTypes.STRING,
-    userId: DataTypes.INTEGER
+    userId: DataTypes.UUID,
+    isActive: DataTypes.BOOLEAN,
   }, {
     sequelize,
     modelName: 'ProfileImage',

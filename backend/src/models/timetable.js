@@ -9,12 +9,22 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.belongsTo(models.Teacher, { foreignKey: "teacherId",as:"teacher" });
+      this.belongsTo(models.Class, { foreignKey: "classId",as:"class" });
+      this.belongsTo(models.Subject, { foreignKey: "subjectId",as:"subject" });
     }
   }
   Timetable.init(
-    {
-      classId: DataTypes.INTEGER,
-      subjectId: DataTypes.INTEGER,
+    { 
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        allowNull: false,
+      },
+      teacherId: DataTypes.UUID,
+      classId: DataTypes.UUID,
+      subjectId: DataTypes.UUID,
       day: DataTypes.ENUM(
         "monday",
         "tuesday",

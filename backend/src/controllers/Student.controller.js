@@ -15,12 +15,20 @@ const getAllStudent = async (req, res) => {
             {
               model: User,
               as: "user",
+              exclude:["createdAt","updatedAt"]
             },
           ],
+        },
+        
+        {
+          model: Class,
+          as: "class",
+          exclude:["createdAt","updatedAt"]
         },
         {
           model: User,
           as: "user",
+          exclude:["createdAt","updatedAt"]
         },
       ],
     });

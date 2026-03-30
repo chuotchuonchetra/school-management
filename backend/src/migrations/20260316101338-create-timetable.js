@@ -5,15 +5,18 @@ module.exports = {
     await queryInterface.createTable("Timetables", {
       id: {
         allowNull: false,
-        autoIncrement: true,
+        defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
       },
       classId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
       },
       subjectId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
+      },
+      teacherId: {
+        type: Sequelize.UUID,
       },
       day: {
         type: Sequelize.ENUM(

@@ -1,7 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
-
 const db = require("../models");
 const { User, Student ,ProfileImage} = db;
 
@@ -30,7 +29,7 @@ const login = async (req, res) => {
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" },
+      { expiresIn: '7d' }// 7 days
     );
 
     res.json({
@@ -40,8 +39,7 @@ const login = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
-      
+        role: user.role,      
       },
     });
   } catch (error) {

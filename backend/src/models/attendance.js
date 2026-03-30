@@ -10,14 +10,24 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       this.belongsTo(models.Student, { foreignKey: "studentId",as:"student" });
       this.belongsTo(models.Subject, { foreignKey: "subjectId",as:"subject" });
+      this.belongsTo(models.Teacher, { foreignKey: "recordedBy",as:"teacher" });
+      this.belongsTo(models.Class, { foreignKey: "classId",as:"class" });
     }
   }
   Attendance.init(
     {
-      studentId: DataTypes.INTEGER,
-      subjectId: DataTypes.INTEGER,
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        allowNull: false,
+      },
+      classId: DataTypes.UUID,
+      studentId: DataTypes.UUID,
+      subjectId: DataTypes.UUID,
       date: DataTypes.DATEONLY,
       status: DataTypes.ENUM("present", "absent", "late", "permission"),
+      recordedBy: DataTypes.UUID,
     },
     {
       sequelize,

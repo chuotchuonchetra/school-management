@@ -15,9 +15,16 @@ module.exports = (sequelize, DataTypes) => {
   }
   Parent.init(
     {
-      userId: DataTypes.INTEGER,
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        allowNull: false,
+      },
+      userId: DataTypes.UUID,
       phone: DataTypes.STRING,
       relationship: DataTypes.ENUM("Father", "Mother", "Guardian"),
+      isActive: DataTypes.BOOLEAN,
     },
     {
       sequelize,

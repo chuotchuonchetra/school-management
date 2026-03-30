@@ -11,16 +11,27 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Grade.belongsTo(models.Student, { foreignKey: "studentId",as:"student" });
       Grade.belongsTo(models.Subject, { foreignKey: "subjectId",as:"subject" });
+      Grade.belongsTo(models.Teacher, { foreignKey: "recordedBy",as:"teacher" });
+      Grade.belongsTo(models.Class, { foreignKey: "classId",as:"class" });
     }
   }
   Grade.init(
     {
-      studentId: DataTypes.INTEGER,
-      subjectId: DataTypes.INTEGER,
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        allowNull: false,
+      },
+      classId: DataTypes.UUID,
+      studentId: DataTypes.UUID,
+      subjectId: DataTypes.UUID,
       score: DataTypes.DECIMAL,
       gradeType: DataTypes.ENUM("homework", "exam", "quiz", "project"),
       semester: DataTypes.INTEGER,
       academicYear: DataTypes.STRING,
+      recordedBy: DataTypes.INTEGER,
+      
     },
     {
       sequelize,
