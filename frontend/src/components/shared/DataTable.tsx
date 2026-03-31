@@ -36,6 +36,15 @@ export const DataTable = <T extends { id: number | string }>({
                   </div>
                 </td>
               </tr>
+            ) : data.length == 0 ? (
+              <tr>
+                {/* Set colSpan to the total number of columns in your table */}
+                <td colSpan={thead.length} className="p-10">
+                  <div className="flex w-full items-center justify-center">
+                    No Data
+                  </div>
+                </td>
+              </tr>
             ) : (
               data.map((item) => (
                 <tr

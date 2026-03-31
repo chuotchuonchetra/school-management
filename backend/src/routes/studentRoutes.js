@@ -1,6 +1,5 @@
 const router = require("express").Router();
 
-
 const {
   authMiddleware,
   roleMiddleware,
@@ -13,8 +12,7 @@ const {
   updateStudent,
   deleteStudent,
 } = require("../controllers/Student.controller");
-
-
+const { upload } = require("../middleware/uploads");
 
 // GET /api/students?search=sophea&classId=1&page=1
 router.get(
@@ -37,6 +35,7 @@ router.post(
   "/students",
   authMiddleware,
   roleMiddleware(["admin"]),
+  upload.single("file"),
   createStudent,
 );
 

@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const db = require("../models");
 
 const { User, Student, Parent, Class, ProfileImage } = db;
@@ -7,6 +7,7 @@ const { User, Student, Parent, Class, ProfileImage } = db;
 const getAllStudent = async (req, res) => {
   try {
     const students = await Student.findAll({
+      attributes: { exclude: ["createdAt", "updatedAt"] },
       include: [
         {
           model: Parent,
@@ -15,20 +16,20 @@ const getAllStudent = async (req, res) => {
             {
               model: User,
               as: "user",
-              exclude:["createdAt","updatedAt"]
+              attributes: ["firstName", "lastName"],
             },
           ],
         },
-        
+
         {
           model: Class,
           as: "class",
-          exclude:["createdAt","updatedAt"]
+          attributes: ["className"],
         },
         {
           model: User,
           as: "user",
-          exclude:["createdAt","updatedAt"]
+          attributes: ["firstName", "lastName"],
         },
       ],
     });
@@ -69,13 +70,13 @@ const getStudents = async (req, res) => {
           as: "user",
           where: userWhere, // ← search filter applied here
           attributes: ["id", "name", "email"],
-          include:[
+          include: [
             {
-              model:ProfileImage,
-              as:"profileImage",
-              attributes:['image','userId','id']
-            }
-          ]
+              model: ProfileImage,
+              as: "profileImage",
+              attributes: ["image", "userId", "id"],
+            },
+          ],
         },
         {
           model: Class,
@@ -91,13 +92,13 @@ const getStudents = async (req, res) => {
               model: User,
               as: "user",
               attributes: ["id", "name", "email"],
-                include:[
+              include: [
                 {
-                  model:ProfileImage,
-                  as:"profileImage",
-                  attributes:['image','userId','id']
-                }
-              ]
+                  model: ProfileImage,
+                  as: "profileImage",
+                  attributes: ["image", "userId", "id"],
+                },
+              ],
             },
           ],
         },
@@ -156,20 +157,14 @@ const getStudentById = async (req, res) => {
             {
               model: User,
               as: "user",
-              attributes: [
-                "id",
-                "firstName",
-                "lastName",
-                "email",
-                
-              ],
-              include:[
+              attributes: ["id", "firstName", "lastName", "email"],
+              include: [
                 {
-                  model:ProfileImage,
-                  as:"profileImage",
-                  attributes:['image','userId','id']
-                }
-              ]
+                  model: ProfileImage,
+                  as: "profileImage",
+                  attributes: ["image", "userId", "id"],
+                },
+              ],
             },
           ],
         },
@@ -186,158 +181,6 @@ const getStudentById = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  POST /api/students
-//  3 cases:
-//  Case A — newParent in body    → create user + parent + student
-//  Case B — parentId in body     → link existing parent + create student
-//  Case C — no parent            → create student only
-// ─────────────────────────────────────────────────────────────
-const createStudent = async (req, res) => {
-  const transaction = await db.sequelize.transaction();
-
-  try {
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      studentNumber,
-      classId,
-      academicYear,
-      parentId, // Case B — existing parent
-      newParent, // Case A — new parent object
-    } = req.body;
-
-    // ── Validate student fields ──────────────────────────────
-    if (
-      !firstName ||
-      !lastName ||
-      !email ||
-      !password ||
-      !studentNumber ||
-      !classId
-    ) {
-      await transaction.rollback();
-      return res
-        .status(400)
-        .json({ message: "All student fields are required" });
-    }
-
-    // check email not already used
-    const existing = await User.findOne({ where: { email }, transaction });
-    if (existing) {
-      await transaction.rollback();
-      return res.status(400).json({ message: "Email already in use" });
-    }
-
-    // ── Resolve parentId ─────────────────────────────────────
-    let resolvedParentId = null;
-
-    // Case A — create new parent
-    if (newParent) {
-      const {
-        firstName: pFirst,
-        lastName: pLast,
-        email: pEmail,
-        password: pPassword,
-        phone,
-        relationship,
-      } = newParent;
-
-      if (
-        !pFirst ||
-        !pLast ||
-        !pEmail ||
-        !pPassword ||
-        !phone ||
-        !relationship
-      ) {
-        await transaction.rollback();
-        return res
-          .status(400)
-          .json({ message: "All parent fields are required" });
-      }
-
-      const parentEmailExists = await User.findOne({
-        where: { email: pEmail },
-        transaction,
-      });
-      if (parentEmailExists) {
-        await transaction.rollback();
-        return res.status(400).json({ message: "Parent email already in use" });
-      }
-
-      // create parent user account
-      const parentUser = await User.create(
-        {
-          name: `${pFirst} ${pLast}`.trim(),
-          email: pEmail,
-          password: await bcrypt.hash(pPassword, 10),
-          role: "parent",
-          profileImage: req.files?.parentProfileImage?.[0]?.path || null,
-        },
-        { transaction },
-      );
-
-      // create parent profile row
-      const parent = await Parent.create(
-        { userId: parentUser.id, phone, relationship },
-        { transaction },
-      );
-
-      resolvedParentId = parent.id;
-    }
-
-    // Case B — link existing parent
-    if (parentId) {
-      const parent = await Parent.findByPk(parentId, { transaction });
-      if (!parent) {
-        await transaction.rollback();
-        return res.status(404).json({ message: "Parent not found" });
-      }
-      resolvedParentId = parentId;
-    }
-
-    // Case C — no parent → resolvedParentId stays null
-
-    // ── Create student user account ──────────────────────────
-    const studentUser = await User.create(
-      {
-        name: `${firstName} ${lastName}`.trim(),
-        email,
-        password: await bcrypt.hash(password, 10),
-        role: "student",
-        
-      },
-      { transaction },
-    );
-
-    // ── Create student profile row ───────────────────────────
-    const student = await Student.create(
-      {
-        userId: studentUser.id,
-        classId: Number(classId),
-        parentId: resolvedParentId,
-        studentNumber,
-        academicYear: academicYear || "2025-2026",
-      },
-      { transaction },
-    );
-
-    await transaction.commit();
-
-    res.status(201).json({ message: "Student created", data: student });
-  } catch (error) {
-    await transaction.rollback();
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// ─────────────────────────────────────────────────────────────
-//  PATCH /api/students/:id
-//  Handles parent mode: keep / edit / change / addNew / remove
-// ─────────────────────────────────────────────────────────────
 const updateStudent = async (req, res) => {
   const transaction = await db.sequelize.transaction();
 
@@ -435,7 +278,6 @@ const updateStudent = async (req, res) => {
           email: pEmail,
           password: await bcrypt.hash(pPassword, 10),
           role: "parent",
-          
         },
         { transaction },
       );
@@ -503,6 +345,172 @@ const deleteStudent = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     res.status(500).json({ message: error.message });
+  }
+};
+
+const createStudent = async (req, res) => {
+  const transaction = await db.sequelize.transaction();
+  try {
+    const file = req.file;
+    console.log(file);
+    if (!req.body.data) {
+      return res.status(400).json({ message: "No data provided" });
+    }
+    const data = JSON.parse(req.body.data);
+    const {
+      firstName,
+      lastName,
+      gender,
+      email,
+      password,
+      phone,
+      parentId,
+      newParent,
+      classId,
+      dateOfBirth,
+      academicYear,
+      studentNumber,
+    } = data;
+
+    if (
+      !firstName ||
+      !studentNumber ||
+      !lastName ||
+      !email ||
+      !password ||
+      !gender ||
+      !classId ||
+      !dateOfBirth ||
+      !academicYear
+    ) {
+      return res.json({
+        message: "all field are required",
+      });
+    }
+    const existingStudentEmail = await User.findOne({
+      where: {
+        email,
+      },
+    });
+    if (existingStudentEmail) {
+      await transaction.rollback();
+      return res.json({
+        message: "Student email already exists",
+      });
+    }
+
+    if (parentId) {
+      const parent = await User.findByPk(parentId);
+      if (!parent) await transaction.rollback();
+      return res.json({
+        message: "Parent not found",
+      });
+    }
+    let finalParentId = parentId;
+    if (newParent && !parentId) {
+      const { pFirstName, pLastName, pEmail, pPassword, pPhone, relationship } =
+        newParent;
+
+      if (
+        !pFirstName ||
+        !pLastName ||
+        !pEmail ||
+        !pPassword ||
+        !pPhone ||
+        !relationship
+      ) {
+        await transaction.rollback();
+        return res.json({
+          message: "Parent fields are required",
+        });
+      }
+
+      const existingParentEmail = await User.findOne({
+        where: {
+          email: pEmail,
+        },
+      });
+      if (existingParentEmail) {
+        await transaction.rollback();
+        return res.json({
+          message: "parent email is exsting",
+        });
+      }
+      const createParentUser = await User.create(
+        {
+          firstName: pFirstName,
+          lastName: pLastName,
+          email: pEmail,
+          role: "parent",
+          password: await bcrypt.hash(pPassword, 10),
+        },
+        { transaction },
+      );
+      const createParent = await Parent.create(
+        {
+          userId: createParentUser.id,
+          relationship,
+          phone: pPhone,
+          isActive: true,
+        },
+        { transaction },
+      );
+      finalParentId = createParent.id;
+    }
+
+    const createStudentUser = await User.create(
+      {
+        firstName,
+        lastName,
+        phone,
+        email,
+        role: "student",
+        password: await bcrypt.hash(password, 10),
+      },
+      {
+        transaction,
+      },
+    );
+
+    const createStudent = await Student.create(
+      {
+        userId: createStudentUser.id,
+        gender,
+        parentId: finalParentId,
+        classId,
+        dateOfBirth,
+        studentNumber,
+        academicYear,
+        isActive: true,
+      },
+      { transaction },
+    );
+
+    if (file) {
+      const imageUrl = file.path;
+
+      var profileImage = await ProfileImage.create(
+        {
+          image: imageUrl,
+          userId: createStudentUser.id,
+          isActive: true,
+        },
+        { transaction },
+      );
+    }
+    await transaction.commit();
+    return res.json({
+      message: "student create successfully!",
+      data: createStudent,
+      image: profileImage,
+    });
+  } catch (error) {
+    console.error(error);
+    await transaction.rollback();
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 };
 
