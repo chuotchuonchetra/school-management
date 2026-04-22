@@ -140,7 +140,7 @@ export const StudentForm = ({ onClose }: Props) => {
     }
   }
   return (
-    <div className="xl:p-6">
+    <div>
       {/* header */}
       <div>
         <p className="pb-1 font-bold">👨‍🎓 Add new student</p>
@@ -195,7 +195,7 @@ export const StudentForm = ({ onClose }: Props) => {
           >
             3
           </div>
-          <span>Parent</span>
+          <span>Cormfirm</span>
         </div>
       </div>
 

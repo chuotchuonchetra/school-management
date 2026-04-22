@@ -30,6 +30,13 @@ const getAllStudent = async (req, res) => {
           model: User,
           as: "user",
           attributes: ["firstName", "lastName"],
+          include: [
+            {
+              model: ProfileImage,
+              as: "profileImage",
+              attributes: ["image", "userId"],
+            },
+          ],
         },
       ],
     });
@@ -347,7 +354,7 @@ const deleteStudent = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
+//POST /api/students
 const createStudent = async (req, res) => {
   const transaction = await db.sequelize.transaction();
   try {

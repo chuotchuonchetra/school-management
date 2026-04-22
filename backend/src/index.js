@@ -6,8 +6,6 @@ const morgan = require("morgan");
 const db = require("./models"); // change if your db path is different
 const userRoutes = require("./routes/userRoutes"); // CommonJS route
 
-
-
 // ── Load env variables ────────────────────────────────────────
 dotenv.config({ path: "./src/.env" });
 
@@ -26,15 +24,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev")); // logs every request in terminal
 
-
-
-app.use('/uploads',express.static('uploads',{
-  maxAge:'1d',
-  index:false,
-  dotfiles:'ignore',
-  etag:true
-}));
-app.use('/api',require('../src/routes/uploadRoute'));
+app.use(
+  "/uploads",
+  express.static("uploads", {
+    maxAge: "1d",
+    index: false,
+    dotfiles: "ignore",
+    etag: true,
+  }),
+);
+app.use("/api", require("../src/routes/uploadRoute"));
 // ── Routes ────────────────────────────────────────────────────
 app.use("/api", userRoutes);
 app.use("/api", require("../src/routes/studentRoutes"));

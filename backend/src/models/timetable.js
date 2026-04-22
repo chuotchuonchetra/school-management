@@ -9,13 +9,19 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.Teacher, { foreignKey: "teacherId",as:"teacher" });
-      this.belongsTo(models.Class, { foreignKey: "classId",as:"class" });
-      this.belongsTo(models.Subject, { foreignKey: "subjectId",as:"subject" });
+      this.belongsTo(models.Teacher, {
+        foreignKey: "teacherId",
+        as: "teacher",
+      });
+      this.belongsTo(models.Class, { foreignKey: "classId", as: "class" });
+      this.belongsTo(models.Subject, {
+        foreignKey: "subjectId",
+        as: "subject",
+      });
     }
   }
   Timetable.init(
-    { 
+    {
       id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
@@ -29,9 +35,10 @@ module.exports = (sequelize, DataTypes) => {
         "monday",
         "tuesday",
         "wednesday",
-        "thuesday",
+        "thursday",
         "friday",
         "saturday",
+        "sunday",
       ),
       startTime: DataTypes.TIME,
       endTime: DataTypes.TIME,

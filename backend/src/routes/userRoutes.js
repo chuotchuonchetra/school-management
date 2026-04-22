@@ -50,8 +50,8 @@ router.delete(
 );
 router.post(
   "/auth/register",
-  authMiddleware,
-  roleMiddleware(["admin"]),
+  // authMiddleware,
+  // roleMiddleware(["admin"]),
   register,
 );
 

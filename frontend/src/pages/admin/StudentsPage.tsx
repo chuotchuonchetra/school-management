@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { EditStudentForm } from "@/components/admin/edit-student-form/EditStudentForm"
 import { StudentForm } from "@/components/admin/StudentForm"
 import { DataTable } from "@/components/shared/DataTable"
@@ -27,7 +28,7 @@ import { getStudentById } from "@/api/student.api"
 
 // ── Hooks & Types ─────────────────────────────────────────────
 import { useStudents } from "@/hooks/useStudents"
-import type { StudentListItem } from "@/types/student.types"
+import type { StudentPayload } from "@/types/student.types"
 import { Plus } from "lucide-react"
 import { useState } from "react"
 
@@ -115,17 +116,16 @@ export const StudentsPage = () => {
     },
   })
 
-  const handleEditClick = async (student: StudentListItem) => {
-    
+  const handleEditClick = async (student: StudentPayload) => {
     setLoadingId(student.id) // show spinner on that row
     try {
       const res = await getStudentById(student.id)
-      setEditTarget(res.data) 
+      setEditTarget(res.data)
       setIsEdit(true)
     } catch (err) {
       console.error("Failed to load student", err)
     } finally {
-      setLoadingId(null) 
+      setLoadingId(null)
     }
   }
 
@@ -221,22 +221,22 @@ export const StudentsPage = () => {
                 {/* Student name + avatar */}
                 <td className="py-3 pr-4">
                   <div className="flex items-center gap-3">
-                    {student.profileImage ? (
+                    {student.user.profileImage ? (
                       <img
-                        src={student.profileImage}
+                        src={student.user.profileImage.image}
                         className="h-9 w-9 rounded-full object-cover"
                       />
                     ) : (
                       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white">
-                        {student.name.charAt(0)}
+                        {student.user.firstName.charAt(0)}
                       </div>
                     )}
                     <div>
                       <div className="text-sm font-semibold">
-                        {student.name}
+                        {student.user.firstName}
                       </div>
                       <div className="text-xs text-gray-400">
-                        {student.email}
+                        {student.user.email}
                       </div>
                     </div>
                   </div>
@@ -248,14 +248,14 @@ export const StudentsPage = () => {
 
                 <td>
                   <span
-                    className={`rounded-md px-2 py-1 text-xs font-semibold ${getClassColor(student.className)}`}
+                    className={`rounded-md px-2 py-1 text-xs font-semibold ${getClassColor("kokoma")}`}
                   >
-                    {student.className}
+                    {student.classId}
                   </span>
                 </td>
 
                 <td className="text-sm text-gray-500">
-                  {student.parentName ?? "—"}
+                  {`${student.parent.user.firstName} ${student.parent.user.lastName}`}
                 </td>
 
                 {/* Attendance bar — uses real attendanceRate from DB */}

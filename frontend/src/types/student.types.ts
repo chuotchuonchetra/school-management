@@ -6,9 +6,6 @@ import type { User } from "./auth.types"
 import type { ParentEditMode } from "./editstudent.type"
 import type { ParentPayLoad } from "./parent.type"
 
-
-
-
 // ── Flat row for the students list table ─────────────────────
 export interface StudentListItem {
   id: number
@@ -19,7 +16,6 @@ export interface StudentListItem {
   className: string // from class.name
   parentName: string | null // from parent user.name
   status: string
-  
 }
 
 // ── Add student form step 1 ───────────────────────────────────
@@ -90,49 +86,49 @@ export interface CreateStudentRequest {
   classId: number
   academicYear: string
   profileImage?: File | null
-  parentId?: number 
+  parentId?: number
   newParent?: ParentPayLoad
 }
 
 export interface StudentPayload {
-  id: number,
-  userId:number,
-  studentNumber: string,
-  classId: number,
-  parentId: number,
-  academicYear: string,
-  user: User,
-  parent:ParentPayLoad
-  createdAt: string,
-  updatedAt: string,
+  id: number
+  userId: number
+  studentNumber: string
+  classId: number
+  parentId: number
+  academicYear: string
+  user: User
+  parent: ParentPayLoad
+  createdAt: string
+  updatedAt: string
 }
+
 // ── PATCH /api/students/:id ───────────────────────────────────
 // types/student.types.ts
 export interface UpdateUserRequest {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  profileImage:profileImage
+  firstName?: string
+  lastName?: string
+  email?: string
+  profileImage: profileImage
 }
 export interface UpdateStudentRequest {
-  studentNumber?: string;
-  classId?: number;
-  parentId?: number;
-  academicYear?: string;
+  studentNumber?: string
+  classId?: number
+  parentId?: number
+  academicYear?: string
   user?: UpdateUserRequest
   parent?: {
-    phone?: string;
-    relationship?: string;
+    phone?: string
+    relationship?: string
     user?: UpdateUserRequest
-  };
-  newPassword?: string;
-  confirmPassword?: string;
+  }
+  newPassword?: string
+  confirmPassword?: string
   updateParentMode?: ParentEditMode
 }
 
-
 export interface profileImage {
-  id: number;
-  image: string;
-  userId: number;
+  id: number
+  image: string
+  userId: number
 }

@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class ProfileImage extends Model {
     /**
@@ -11,23 +9,28 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      ProfileImage.belongsTo(models.User,{foreignKey:'userId',as:'user'})
-      
+      ProfileImage.belongsTo(models.User, {
+        foreignKey: "userId",
+        as: "profileImage",
+      });
     }
   }
-  ProfileImage.init({
-    id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
-      allowNull: false,
+  ProfileImage.init(
+    {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        allowNull: false,
+      },
+      image: DataTypes.STRING,
+      userId: DataTypes.UUID,
+      isActive: DataTypes.BOOLEAN,
     },
-    image: DataTypes.STRING,
-    userId: DataTypes.UUID,
-    isActive: DataTypes.BOOLEAN,
-  }, {
-    sequelize,
-    modelName: 'ProfileImage',
-  });
+    {
+      sequelize,
+      modelName: "ProfileImage",
+    },
+  );
   return ProfileImage;
 };

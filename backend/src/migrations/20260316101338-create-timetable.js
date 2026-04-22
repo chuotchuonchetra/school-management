@@ -23,9 +23,10 @@ module.exports = {
           "monday",
           "tuesday",
           "wednesday",
-          "thuesday",
+          "thursday",
           "friday",
           "saturday",
+          "sunday",
         ),
       },
       startTime: {

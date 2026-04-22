@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // useStudent.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
@@ -7,37 +6,12 @@ import {
   getStudents,
   updateStudent,
 } from "@/api/student.api"
-import type { StudentListItem } from "@/types/student.types"
+import type { StudentPayload } from "@/types/student.types"
 
 export const useStudents = () => {
-  return useQuery<StudentListItem[]>({
+  return useQuery<StudentPayload[]>({
     queryKey: ["students"],
     queryFn: getStudents,
-
-    select: (students: any[]) =>
-      students.map((s) => ({
-        id: s.id,
-
-        studentNumber: s.studentNumber,
-
-        name:
-          `${s.user?.firstName ?? ""} ${s.user?.lastName ?? ""}`.trim() ||
-          "Unknown",
-
-        email: s.user?.email ?? "",
-
-        profileImage: s.user?.profileImage ?? null,
-
-        className: `Class ${s.classId}`,
-
-        parentName: s.parent?.user
-          ? `${s.parent.user.firstName ?? ""} ${s.parent.user.lastName ?? ""}`
-          : "—",
-
-        attendance: 90,
-
-        status: "Active",
-      })),
   })
 }
 export const useCreateStudent = (onSuccess?: () => void) => {
